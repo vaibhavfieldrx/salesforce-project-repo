@@ -1,0 +1,74 @@
+.page {
+    padding: 20px;
+    font-family: Inter, sans-serif;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.primary {
+    background: #2563eb;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+}
+.revenue{
+    margin-top: 20px;
+}
+.content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.right {
+    text-align: right;
+}
+
+/* STATUS BADGES */
+.badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.delivered { background: #dcfce7; color: #16a34a; }
+.processing { background: #ffedd5; color: #f97316; }
+.shipped { background: #dbeafe; color: #2563eb; }
+.pending { background: #f1f5f9; color: #475569; }
+
+/* SUMMARY */
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .content {
+        grid-template-columns: 1fr;
+    }
+}

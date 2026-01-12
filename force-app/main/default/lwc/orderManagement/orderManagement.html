@@ -1,0 +1,74 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-12-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="page">
+
+        <div class="header">
+            <div>
+                <h1>Order Management</h1>
+                <p>Create and manage customer orders</p>
+            </div>
+            <button class="primary">+ New Order</button>
+        </div>
+
+        <div class="content">
+
+            <!-- TABLE -->
+            <div class="card table-card">
+                <h2>All Orders</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ORDER ID</th>
+                            <th>CUSTOMER</th>
+                            <th>DATE</th>
+                            <th>STATUS</th>
+                            <th class="right">TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={orders} for:item="o">
+                            <tr key={o.id}>
+                                <td>#{o.number}</td>
+                                <td>{o.customer}</td>
+                                <td>{o.date}</td>
+                                <td><span class={o.statusClass}>{o.status}</span></td>
+                                <td class="right">₹{o.amount}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="side">
+
+                <div class="card">
+                    <h3>Order Summary</h3>
+                    <template for:each={summaryList} for:item="s">
+                        <div key={s.label} class="summary-row">
+                            <span class={s.iconClass}></span>
+                            <span>{s.label}</span>
+                            <b>{s.count}</b>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="card revenue">
+                    <div>
+                        <p>Total Revenue</p>
+                        <h2>₹{revenue}</h2>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</template>
