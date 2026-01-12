@@ -1,0 +1,62 @@
+.datatable-container {
+    border: 1px solid #c9c9c9;
+    border-radius: 8px;
+    overflow: hidden; 
+    background: #ffffff;
+    padding: 10px;
+}
+.box-container{
+    padding: 10px;
+}
+
+.box-container {
+    padding: 1rem;
+}
+
+.custom-table-container {
+    overflow-x: auto;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.custom-table thead {
+    background-color: #1b5f9e;
+    color: white;
+}
+
+.custom-table th,
+.custom-table td {
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.custom-table tbody tr {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #f3f6f9;
+}
+
+/* Status styling */
+.status-present {
+    color: #2e844a;
+    font-weight: 600;
+}
+
+.status-absent {
+    color: #ba0517;
+    font-weight: 600;
+}
+
+.status-late {
+    color: #fe9339;
+    font-weight: 600;
+}

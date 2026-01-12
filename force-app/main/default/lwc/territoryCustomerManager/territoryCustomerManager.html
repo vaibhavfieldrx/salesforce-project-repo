@@ -1,0 +1,93 @@
+<template>
+    <div class="page">
+
+        <!-- Header -->
+        <div class="header">
+                <h1>Territory & Customer Management</h1>
+                <p>View and manage customers by sales territory</p>
+        </div>
+
+        <div class="layout">
+
+            <!-- LEFT: CUSTOMER LIST -->
+            <div class="left-panel">
+
+                <!-- Search -->
+                <div class="search-bar">
+                    <lightning-input
+                        type="search"
+                        placeholder="Search customers..."
+                        onchange={handleSearch}>
+                    </lightning-input>
+                </div>
+                <template for:each={filteredCustomers} for:item="cust">
+                <div
+                    key={cust.accountId}
+                    class="customer-card"
+                    data-id={cust.accountId}
+                    onclick={selectCustomer}>
+
+                    <!-- LEFT 90% : Customer Info -->
+                    <div class="customer-info">
+                        <div class="cust-name">
+                            {cust.name}
+                        </div>
+
+                        <div class="cust-email">
+                            {cust.email}
+                        </div>
+                    </div>
+
+                    <!-- RIGHT 10% : Status -->
+                    <div class={cust.statusClass}>
+                        {cust.status}
+                    </div>
+
+                </div>
+            </template>
+
+                <template if:false={filteredCustomers.length}>
+                    <div class="empty-left">
+                        No customers found
+                    </div>
+                </template>
+            </div>
+
+            <!-- RIGHT: CUSTOMER DETAILS -->
+            <div class="right-panel">
+                <template if:true={selectedCustomer}>
+                    <div class="detail-card">
+                        <h2>{selectedCustomer.name}</h2>
+
+                        <div class="detail-row">
+                            <strong>Email:</strong>
+                            {selectedCustomer.email}
+                        </div>
+
+                        <div class="detail-row">
+                            <strong>Phone:</strong>
+                            {selectedCustomer.phone}
+                        </div>
+
+                        <div class="detail-row">
+                            <strong>Address:</strong>
+                            {selectedCustomer.address}
+                        </div>
+
+                        <div class="detail-row">
+                            <strong>Territory:</strong>
+                            {selectedCustomer.territory}
+                        </div>
+                    </div>
+                </template>
+
+                <template if:false={selectedCustomer}>
+                    <div class="empty-right">
+                        Select a customer to view details
+                    </div>
+                </template>
+            </div>
+
+        </div>
+    </div>
+</template>

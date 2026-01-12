@@ -1,0 +1,20 @@
+<template>
+    <lightning-card title="Product Details">
+        <template if:true={product}>
+            <div class="slds-p-around_medium">
+                <p><strong>Name:</strong> {product.Name}</p>
+                <p><strong>Product Code:</strong> {product.ProductCode}</p>
+                <p><strong>Family:</strong> {product.Family}</p>
+                <p><strong>Active:</strong> {product.IsActive}</p>
+                <p><strong>Description:</strong> {product.Description}</p>
+                <p><strong>Price:</strong> {price}</p>
+            </div>
+        </template>
+
+        <template if:false={product}>
+            <p class="slds-p-around_medium">
+                Select a product record to view details.
+            </p>
+        </template>
+    </lightning-card>
+</template>

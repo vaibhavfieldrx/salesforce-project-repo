@@ -1,0 +1,82 @@
+.catalog-container {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    background: #f7f9fc;
+}
+
+.sidebar {
+    width: 240px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.sidebar input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar li {
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.sidebar li.active {
+    background: #2563eb;
+    color: white;
+}
+
+.product-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+    gap: 20px;
+}
+
+.product-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    position: relative;
+}
+
+.badge.active {
+    background: #22c55e;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+.icon {
+    font-size: 32px;
+    margin: 10px 0;
+}
+
+.code {
+    color: #6b7280;
+}
+
+.category {
+    background: #eef2ff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.price {
+    color: #2563eb;
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 18px;
+}

@@ -1,0 +1,34 @@
+<template>
+<header class="header">
+<!-- Logo -->
+<div class="logo">
+    <img src={logoUrl} alt="FieldRx Logo" class="logo" />
+
+</div>
+ 
+        <!-- Hamburger -->
+<div class="hamburger" onclick={toggleMenu}>
+            ☰
+</div>
+ 
+        <!-- Navigation -->
+<nav class={navClass}>
+<ul class="nav-list">
+<template for:each={tabs} for:item="tab">
+<li key={tab.label}
+                        class={tab.class}
+                        data-url={tab.url}
+                        onclick={navigate}>
+<lightning-icon
+                            icon-name={tab.icon}
+                            size="x-small"
+                            class="icon">
+</lightning-icon>
+ 
+                        <span>{tab.label}</span>
+</li>
+</template>
+</ul>
+</nav>
+</header>
+</template>

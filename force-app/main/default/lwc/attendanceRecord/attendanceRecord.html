@@ -1,0 +1,75 @@
+<template>
+    <lightning-card title="FE Attendance Records">
+        <div class="box-container">
+
+            <template if:true={attendanceList}>
+                <div class="custom-table-container">
+
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>FE Name</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                       <tbody>
+    <template for:each={attendanceList} for:item="record">
+        <tr key={record.Id}>
+            <td>{record.Name}</td>
+            <td><lightning-formatted-date-time
+        value={record.Check_in_Time__c}
+        day="2-digit"
+        month="short"
+        year="numeric">
+    </lightning-formatted-date-time></td>
+            <td><lightning-formatted-date-time
+        value={record.Check_out_Time__c}
+        day="2-digit"
+        month="short"
+        year="numeric">
+    </lightning-formatted-date-time></td>
+            <td>
+                <span class={record.statusClass}>
+                    {record.Status__c}
+                </span>
+            </td>
+        </tr>
+    </template>
+</tbody>
+
+                    </table>
+
+                </div>
+
+                <!-- Pagination -->
+                <div class="slds-m-top_medium slds-align_absolute-center">
+                    <lightning-button
+                        label="Previous"
+                        onclick={handlePrevious}
+                        disabled={disablePrevious}>
+                    </lightning-button>
+
+                    <span class="slds-m-horizontal_small">
+                        Page {pageNumber} of {totalPages}
+                    </span>
+
+                    <lightning-button
+                        label="Next"
+                        onclick={handleNext}
+                        disabled={disableNext}>
+                    </lightning-button>
+                </div>
+            </template>
+
+            <template if:false={attendanceList}>
+                <div class="slds-p-around_medium slds-align_absolute-center">
+                    No attendance records found
+                </div>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

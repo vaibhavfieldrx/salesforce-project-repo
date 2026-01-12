@@ -1,0 +1,112 @@
+/* Toolbar */
+.toolbar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    padding: 12px;
+    background: #f3f3f3;
+    border-bottom: 1px solid #ddd;
+}
+
+.apply-btn {
+    align-self: flex-end;
+}
+
+/* KPI */
+.kpi {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+}
+
+.kpi-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.kpi-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2e844a;
+}
+
+/* Month Section */
+.month-block {
+    padding: 12px;
+    border-top: 1px solid #eee;
+}
+
+.month-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* Pills */
+.pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.date-pill {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e6f4ea, #c7ead3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.weekday {
+    font-size: 11px;
+    color: #1f7a4d;
+}
+
+.day-number {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Empty */
+.empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+}
+
+.date-pill {
+    width: 60px; height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg,#e6f4ea,#c7ead3);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    cursor: pointer;
+}
+
+.weekday{ font-size:11px; color:#1f7a4d; }
+.day-number{ font-size:18px; font-weight:700; }
+
+.tooltip{
+    font-size:13px;
+    color:#333;
+}
+
+.custom-bg-btn {
+    background-color: #1B5F9E !important; /* Your color */
+    color: #ffffff !important;            /* White text */
+    border-radius: 4px;                   /* Optional rounding */
+    font-weight: 500;
+    padding: 8px 16px;
+
+    text-align: center;
+}
+
+.custom-bg-btn:hover {
+    background-color: #1B5F9E !important; /* Slightly darker on hover */
+}

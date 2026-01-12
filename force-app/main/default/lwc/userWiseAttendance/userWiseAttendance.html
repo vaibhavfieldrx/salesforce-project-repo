@@ -1,0 +1,121 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-12-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title="Attendance Overview" icon-name="standard:timesheet">
+
+        <!-- FILTER TOOLBAR -->
+        <div class="toolbar">
+
+                 <template if:true={isAdmin}>
+    <lightning-combobox
+        label="Select User"
+        value={selectedUserId}
+        options={users}
+        onchange={handleUserChange}>
+    </lightning-combobox>
+</template>
+
+
+            <lightning-combobox
+                label="View"
+                value={viewType}
+                options={viewOptions}
+                onchange={handleViewChange}>
+            </lightning-combobox>
+
+            <template if:true={showMonthPicker}>
+                <lightning-input
+                    type="month"
+                    label="Month"
+                    value={selectedMonth}
+                    onchange={handleMonthChange}>
+                </lightning-input>
+            </template>
+
+       
+            <template if:true={showYearPicker}>
+              <lightning-input
+    type="text"
+    label="Year"
+    value={selectedYear}
+    maxlength="4"
+    pattern="[0-9]{4}"
+    message-when-pattern-mismatch="Enter a valid year (YYYY)"
+    onchange={handleYearChange}>
+</lightning-input>
+
+            </template>
+
+            <template if:true={showCustomPicker}>
+                <lightning-input
+                    type="date"
+                    label="Start"
+                    value={startDate}
+                    onchange={handleStartDateChange}>
+                </lightning-input>
+
+                <lightning-input
+                    type="date"
+                    label="End"
+                    value={endDate}
+                    onchange={handleEndDateChange}>
+                </lightning-input>
+            </template>
+
+          <div
+    class="apply-btn custom-bg-btn"
+    onclick={fetchAttendance}>Apply
+</div>
+
+        </div>
+
+        <!-- KPI -->
+        <template if:true={presentCount}>
+            <div class="kpi">
+                <span class="kpi-label">Present Days</span>
+                <span class="kpi-value">{presentCount}</span>
+            </div>
+        </template>
+
+        <!-- ATTENDANCE -->
+        <template if:true={groupedAttendance}>
+            <template for:each={groupedAttendance} for:item="month">
+                <div key={month.month} class="month-block">
+                    <div class="month-title">{month.month}</div>
+
+                    <div class="pill-container">
+                        <template for:each={month.days} for:item="day">
+                            <div key={day.date} class="date-pill" 
+                                 onmouseover={showTooltip} 
+                                 onmouseout={hideTooltip}
+                                 data-checkin={day.checkIn}
+                                 data-checkout={day.checkOut}>
+                                <span class="weekday">{day.day}</span>
+                                <span class="day-number">{day.date}</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </template>
+
+        <!-- TOOLTIP -->
+        <div class="tooltip" if:true={tooltipVisible} style={tooltipStyle}>
+            <div><b>Check-In:</b> {tooltipData.checkIn}</div>
+            <div><b>Check-Out:</b> {tooltipData.checkOut}</div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <template if:false={presentCount}>
+            <div class="empty-state">
+                No present records found
+            </div>
+        </template>
+
+    </lightning-card>
+</template>

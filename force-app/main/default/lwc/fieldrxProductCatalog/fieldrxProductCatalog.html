@@ -1,0 +1,40 @@
+<template>
+    <div class="catalog-container">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <input type="search" placeholder="Search products..." onkeyup={handleSearch}/>
+            
+            <h3>Categories</h3>
+            <ul>
+                <li class="active">All Categories</li>
+                <li>Widgets</li>
+                <li>Gadgets</li>
+                <li>Components</li>
+                <li>Parts</li>
+            </ul>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="product-grid">
+            <template for:each={products} for:item="prod">
+                <div key={prod.id} class="product-card">
+
+                    <div class="status">
+                        <span if:true={prod.isActive} class="badge active">Active</span>
+                    </div>
+
+                    <div class="icon">📦</div>
+
+                    <h2>{prod.name}</h2>
+                    <p class="code">{prod.code}</p>
+                    <span class="category">{prod.category}</span>
+
+                    <div class="price">${prod.price}</div>
+
+                </div>
+            </template>
+        </div>
+
+    </div>
+</template>

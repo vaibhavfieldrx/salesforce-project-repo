@@ -1,0 +1,133 @@
+<!-- <template>
+    <lightning-card title="Show all Customer on bases of terrirotry">
+
+        <div class="container">
+            <div class="combobox-section">
+                <lightning-combobox
+                    label="Select Territory"
+                    value={selectedTerritory}
+                    options={territoryOptions}
+                    onchange={handleTerritoryChange}>
+                </lightning-combobox>
+            </div>
+
+            <template if:true={showHeader}>
+
+                <div class="table-section">
+                    <div class="datatable-wrapper">
+                        <lightning-datatable
+                            key-field="Id"
+                            data={paginatedAccounts}
+                            columns={columns}
+                            hide-checkbox-column
+                            show-row-number-column>
+                        </lightning-datatable>
+                    </div>
+                </div>
+
+                <div class="pagination-section">
+
+                    <lightning-button-icon
+                        icon-name="utility:chevronleft"
+                        variant="bare"
+                        alternative-text="Previous"
+                        onclick={handlePrevious}
+                        disabled={disablePrevious}>
+                    </lightning-button-icon>
+
+
+                    <span class="page-info">
+                        Page {currentPage} of {totalPages}
+                    </span>
+
+                    <lightning-button-icon
+                        icon-name="utility:chevronright"
+                        variant="bare"
+                        alternative-text="Next"
+                        onclick={handleNext}
+                        disabled={disableNext}>
+                    </lightning-button-icon>
+                </div>
+
+            </template>
+        </div>
+
+    </lightning-card>
+</template> -->
+
+<template>
+    <lightning-card title="Show all Customers based on Territory">
+
+        <div class="container">
+            <div class="combobox-section">
+                <lightning-combobox
+                    label="Select Territory"
+                    value={selectedTerritory}
+                    options={territoryOptions}
+                    onchange={handleTerritoryChange}>
+                </lightning-combobox>
+            </div>
+
+            <template if:true={showHeader}>
+
+                <div class="custom-table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Customer Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Account Source</th>
+                                <th>Type</th>
+                                <th>Annual Revenue</th>
+                                <th>Industry</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <template for:each={paginatedAccounts} for:item="acc">
+                                <tr key={acc.Id}>
+                                    <td>{acc.rowNumber}</td>
+                                    <td class="name-cell">{acc.Name}</td>
+                                    <td>{acc.Phone}</td>
+                                    <td>
+                                        <a href={acc.emailLink}>{acc.Email__c}</a>
+                                    </td>
+                                    <td>{acc.AccountSource}</td>
+                                    <td>{acc.Type}</td>
+                                    <td class="amount-cell">₹ {acc.displayRevenue}</td>
+                                    <td>{acc.Industry}</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-section">
+                    <lightning-button-icon
+                        icon-name="utility:chevronleft"
+                        variant="bare"
+                        alternative-text="Previous"
+                        onclick={handlePrevious}
+                        disabled={disablePrevious}>
+                    </lightning-button-icon>
+
+                    <span class="page-info">
+                        Page {currentPage} of {totalPages}
+                    </span>
+
+                    <lightning-button-icon
+                        icon-name="utility:chevronright"
+                        variant="bare"
+                        alternative-text="Next"
+                        onclick={handleNext}
+                        disabled={disableNext}>
+                    </lightning-button-icon>
+                </div>
+
+            </template>
+        </div>
+
+    </lightning-card>
+</template>

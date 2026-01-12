@@ -1,0 +1,43 @@
+<template>
+    <lightning-card title="All Products">
+
+        <div class="datatable-container box-container">
+
+            <div class="custom-table-container">
+                <table class="custom-table">
+
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Product Code</th>
+                            <th>Active</th>
+                            <th>Description</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <template for:each={pagedProducts} for:item="prod">
+                            <tr key={prod.Id}>
+                                <td>{prod.name}</td>
+                                <td>{prod.productCode}</td>
+                                <td>{prod.isActive}</td>
+                                <td>{prod.description}</td>
+                                <td>₹{prod.price}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="product-pagination">
+                <button onclick={prevPage} disabled={isFirstPage}>Previous</button>
+                <span>Page {pageNumber} of {totalPages}</span>
+                <button onclick={nextPage} disabled={isLastPage}>Next</button>
+            </div>
+
+        </div>
+    </lightning-card>
+</template>
