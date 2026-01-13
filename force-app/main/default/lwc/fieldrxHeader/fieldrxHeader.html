@@ -1,34 +1,47 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-13-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
+    <div class="page-bg">
+    <div class="page-container">
 <header class="header">
-<!-- Logo -->
-<div class="logo">
+    
+<div class="headerlogo">
     <img src={logoUrl} alt="FieldRx Logo" class="logo" />
 
 </div>
  
-        <!-- Hamburger -->
 <div class="hamburger" onclick={toggleMenu}>
             ☰
 </div>
  
-        <!-- Navigation -->
-<nav class={navClass}>
-<ul class="nav-list">
-<template for:each={tabs} for:item="tab">
-<li key={tab.label}
-                        class={tab.class}
-                        data-url={tab.url}
-                        onclick={navigate}>
-<lightning-icon
-                            icon-name={tab.icon}
-                            size="x-small"
-                            class="icon">
+ <div class={navClass}>
+        <ul class="nav-list">
+        <template for:each={tabs} for:item="tab">
+                <li key={tab.label} 
+                    class={tab.cssClass} 
+                    data-page={tab.label} 
+                    onclick={navigate}>
+                   <lightning-icon
+    icon-name={tab.icon}
+    size="x-small"
+    class={tab.tabClass} 
+   >
 </lightning-icon>
- 
-                        <span>{tab.label}</span>
-</li>
-</template>
-</ul>
-</nav>
+                    <span>{tab.label}</span>
+                </li>
+            </template>
+
+
+
+        </ul>
+    </div>
+
 </header>
+</div>
+</div>
 </template>

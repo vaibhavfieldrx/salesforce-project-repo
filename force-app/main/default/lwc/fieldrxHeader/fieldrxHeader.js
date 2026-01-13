@@ -1,26 +1,27 @@
 import { LightningElement, wire, track } from 'lwc';
 
-import { NavigationMixin } from 'lightning/navigation';
+import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 
 import { getContent } from 'experience/cmsDeliveryApi';
+import FieldRxLogo from '@salesforce/resourceUrl/FieldRxLogo';
+
  
 export default class FieldrxHeader extends NavigationMixin(LightningElement) {
  
     @track isMenuOpen = false;
-
-    activeTab = 'Dashboard';
+    @track activeTab = 'Home';
  
 
-    logoUrl;
+    logoUrl = FieldRxLogo;
  
 
     tabsData = [
 
-        { label: 'Dashboard', icon: 'utility:home', url: '/dashboard' },
+        { label: 'Home', icon: 'utility:home', url: '/dashboard' },
 
         { label: 'Customers', icon: 'utility:user', url: '/customers' },
 
-        { label: 'Orders', icon: 'utility:cart', url: '/orders' },
+        { label: 'Order', icon: 'utility:cart', url: '/order' },
 
         { label: 'Products', icon: 'utility:product', url: '/products' },
 
@@ -34,43 +35,8 @@ export default class FieldrxHeader extends NavigationMixin(LightningElement) {
 
     ];
  
-    // ✅ CMS Image Fetch
-
-    @wire(getContent, {
-
-        contentId: 'MCDTJDQEZRNRE55B3XGBZFODUVIQ',
-
-        channelOrSiteId: 'MCDTJDQEZRNRE55B3XGBZFODUVIQ'
-
-    })
-
-    wiredContent({ data, error }) {
-console.log ('data', data);
-        if (data) {
-
-            this.logoUrl = data.contentNodes.source.url;
-
-        }
-
-        if (error) {
-
-            console.error('CMS error', error);
-
-        }
-
-    }
  
-    get tabs() {
 
-        return this.tabsData.map(tab => ({
-
-            ...tab,
-
-            class: tab.label === this.activeTab ? 'nav-item active' : 'nav-item'
-
-        }));
-
-    }
  
     get navClass() {
 
@@ -83,23 +49,50 @@ console.log ('data', data);
         this.isMenuOpen = !this.isMenuOpen;
 
     }
- 
-    navigate(event) {
 
-        const url = event.currentTarget.dataset.url;
-
-        this.activeTab = event.currentTarget.innerText.trim();
-
-        this.isMenuOpen = false;
- 
-        this[NavigationMixin.Navigate]({
-
-            type: 'standard__webPage',
-
-            attributes: { url }
-
-        });
-
+@wire(CurrentPageReference)
+    pageRef({ state }) {
+        if (state && state.c__activeTab) {
+            // If navigation passes a state param
+            this.activeTab = state.c__activeTab;
+        } else {
+            // fallback: try to match URL with tab label
+            const path = window.location.pathname.toLowerCase();
+            const tab = this.tabsData.find(t => path.includes(t.label.toLowerCase()));
+            this.activeTab = tab ? tab.label : 'Home';
+        }
     }
 
+    // Navigate when header tab is clicked
+navigate(event) {
+    const label = event.currentTarget.dataset.page;
+    this.activeTab = label;
+
+    const routeMap = {
+        Home: '/',
+        Customers: 'customers',
+        Order: 'order',
+        Products: 'product',
+        Warehouse: 'warehouse',
+        Inventory: 'inventory',
+        Attendance: 'attendance',
+        Reports: 'reports'
+    };
+
+    const url = routeMap[label];
+    console.log("url", url)
+    this[NavigationMixin.Navigate]({
+        type: 'standard__webPage',
+        attributes: { url }
+    });
+}
+
+    // Compute CSS class for tabs
+    get tabs() {
+        return this.tabsData.map(tab => ({
+            ...tab,
+            cssClass: tab.label === this.activeTab ? 'nav-item active' : 'nav-item',
+            tabClass:  tab.label === this.activeTab ? 'menu-icon active' : 'menu-icon'
+        }));
+    }
 }

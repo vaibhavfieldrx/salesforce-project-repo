@@ -1,6 +1,8 @@
 .page {
-    padding: 20px;
-    font-family: Inter, sans-serif;
+
+    max-width: 1300px;   
+    margin: 0 auto;     
+    padding: 0 24px;     
 }
 
 .header {
@@ -8,11 +10,19 @@
     justify-content: space-between;
     align-items: center;
 }
+.title{
+    font-size: 24px;
+    font-weight: bold;
 
+}
+.desc{
+    color: #a3a1a1;
+}
 .primary {
-    background: #2563eb;
+    background: #45A6A2;
     color: white;
-    padding: 10px 16px;
+    font-weight: 500;
+    padding: 8px 14px;
     border-radius: 8px;
     border: none;
 }
@@ -30,16 +40,30 @@
     background: white;
     border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+border: 1px solid #e5e7eb;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
+}
+.title-2{
+    font-weight: bold;
+    font-size: 20px;
 }
 
+.title-3{
+    font-weight: bold;
+    font-size: 16px;
+}
 table {
     width: 100%;
     border-collapse: collapse;
 }
 
+th{
+ font-size: 15px;
+    color: #979696;
+}
 th, td {
     padding: 12px;
+    font-size: 14px;
     border-bottom: 1px solid #eee;
 }
 
@@ -47,17 +71,93 @@ th, td {
     text-align: right;
 }
 
-/* STATUS BADGES */
-.badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
+/* Icon wrapper box */
+.icon-wrapper {
+    padding: 10px;
+    border-radius: 50%; /* circle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.delivered { background: #dcfce7; color: #16a34a; }
-.processing { background: #ffedd5; color: #f97316; }
-.shipped { background: #dbeafe; color: #2563eb; }
-.pending { background: #f1f5f9; color: #475569; }
+
+.icon-wrapper {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+/* Green */
+.green-icon {
+    background-color: #a2e0b9;
+    padding: 6px;
+    transform: scale(0.75);
+    --sds-c-icon-color-foreground-default: #145e2f;
+}
+
+/* Orange */
+.orange-icon {
+    background-color: #f1c8ab;
+    padding: 6px;
+    transform: scale(0.75);
+    --sds-c-icon-color-foreground-default: #a84c0a;
+}
+
+/* Blue */
+.blue-icon {
+    background-color: #acc5ec;
+    padding: 6px;
+    transform: scale(0.75);
+    --sds-c-icon-color-foreground-default: #0e3169;
+}
+
+/* Gray */
+.gray-icon {
+    background-color: #c2cbde;
+    padding: 6px;
+    transform: scale(0.75);
+    --sds-c-icon-color-foreground-default: #343944;
+}
+
+.red-icon {
+    background-color: #e1b7b7;
+    padding: 6px;
+    transform: scale(0.75);
+    --sds-c-icon-color-foreground-default: #790d0d;
+}
+
+.yellow-icon {
+    background-color: #e7eabc;
+    padding: 6px;
+    transform: scale(0.75);
+    --sds-c-icon-color-foreground-default: #949906;
+}
+
+
+
+/* Status badges */
+.badge {
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    color: white;
+    font-size: 12px;
+}
+.badge.delivered { background-color: #a2e0b9; color:#145e2f ; }
+.badge.processing { background-color: #f1c8ab; color:  #a84c0a; }
+.badge.shipped { background-color: #acc5ec; color: #0e3169; }
+.badge.pending { background-color: #c2cbde; color: #343944;}
+.badge.cancelled { background-color: #e1b7b7; color: #790d0d;}
+.badge.rejected { background-color: #e7eabc; color: #949906;}
+
+.amount{
+    font-size: 20px;
+    font-weight: bold;
+    color: #5d5e62;
+}
+
+
+.label{
+    margin-left: 10px;
+    font-size: 14px;
+}
 
 /* SUMMARY */
 .summary-row {
@@ -65,6 +165,74 @@ th, td {
     justify-content: space-between;
     padding: 10px 0;
 }
+.under-icon{
+    display: flex;
+    align-items: center;
+}
+
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-top: 16px;
+}
+
+/* Buttons */
+.page-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.page-btn.primary {
+    background: #45A6A2;
+    border-color: #45A6A2;
+    color: #ffffff;
+}
+
+.page-btn.primary:hover:not(:disabled) {
+    background: #709e9c;
+}
+
+/* Disabled state */
+.page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Page info */
+.page-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.page-number {
+    font-weight: 600;
+    color: #111827;
+}
+
+.page-total {
+    font-weight: 500;
+}
+
 
 /* RESPONSIVE */
 @media (max-width: 900px) {

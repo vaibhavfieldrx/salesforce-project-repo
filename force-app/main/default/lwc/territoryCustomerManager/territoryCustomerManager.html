@@ -6,6 +6,7 @@
                 <h1>Territory & Customer Management</h1>
                 <p>View and manage customers by sales territory</p>
         </div>
+    
 
         <div class="layout">
 
@@ -20,7 +21,9 @@
                         onchange={handleSearch}>
                     </lightning-input>
                 </div>
+        
                 <template for:each={filteredCustomers} for:item="cust">
+        
                 <div
                     key={cust.accountId}
                     class="customer-card"
@@ -46,11 +49,32 @@
                 </div>
             </template>
 
-                <template if:false={filteredCustomers.length}>
-                    <div class="empty-left">
+            <template if:false={filteredCustomers.length}>
+                 <lightning-card  >
+                     <div class="empty-left">
                         No customers found
                     </div>
-                </template>
+                </lightning-card>
+            </template>
+
+            <div class="pagination">
+                <lightning-button
+                    label="Previous"
+                    onclick={handlePrev}
+                    disabled={disablePrev}>
+                </lightning-button>
+
+                <span class="page-info">
+                    Page {currentPage} of {totalPages}
+                </span>
+
+                <lightning-button
+                    label="Next"
+                    onclick={handleNext}
+                    disabled={disableNext}>
+                </lightning-button>
+            </div>
+               
             </div>
 
             <!-- RIGHT: CUSTOMER DETAILS -->
@@ -81,11 +105,21 @@
                     </div>
                 </template>
 
-                <template if:false={selectedCustomer}>
+                <!-- <template if:false={selectedCustomer}>
                     <div class="empty-right">
                         Select a customer to view details
                     </div>
-                </template>
+                </template> -->
+
+                 <template if:false={selectedCustomer}>
+                <div class="right-card">
+                 <lightning-card>
+                     <div class="empty-right">
+                         Select a customer to view details
+                    </div>
+                </lightning-card>
+                </div>
+            </template>
             </div>
 
         </div>
