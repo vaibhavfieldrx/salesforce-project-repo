@@ -9,8 +9,6 @@ public with sharing class OrderManagementController {
 
   @AuraEnabled(cacheable=true)
     public static Map<String, Object> getDashboardData() {
-
-        // 1️⃣ Latest 50 orders (table)
         List<Order> orders = [
             SELECT Id, OrderNumber, Status, TotalAmount, EffectiveDate,
                    Account.Name
@@ -18,8 +16,6 @@ public with sharing class OrderManagementController {
             ORDER BY CreatedDate DESC
             LIMIT 10
         ];
-
-        // 2️⃣ Overall status summary (NO LIMIT)
         Map<String, Integer> summary = new Map<String, Integer>();
         for (AggregateResult ar : [
             SELECT Status status, COUNT(Id) cnt
@@ -28,8 +24,6 @@ public with sharing class OrderManagementController {
         ]) {
             summary.put((String) ar.get('status'), (Integer) ar.get('cnt'));
         }
-
-        // 3️⃣ Total Revenue (overall)
         Decimal revenue = 0;
         AggregateResult ar = [
             SELECT SUM(TotalAmount) total
