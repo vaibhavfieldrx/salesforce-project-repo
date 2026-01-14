@@ -123,13 +123,9 @@ padding-right: 20px;
     }
  
     .nav-list {
-
         flex-direction: column;
-
         padding: 12px;
-
         gap: 16px;
-
     }
  
     .nav-item.active {
