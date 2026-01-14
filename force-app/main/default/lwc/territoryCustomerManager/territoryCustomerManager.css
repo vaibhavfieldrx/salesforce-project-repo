@@ -3,14 +3,28 @@
     background: #f8fafc;
 }
 
-/* Header */
+
 .header h1 {
     font-size: 1.5rem;
     font-weight: 600;
+    margin: 0;
 }
+
 .header p {
     color: #6b7280;
     margin-bottom: 1rem;
+}
+
+
+.layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1rem;
+}
+
+.left-panel {
+    display: flex;
+    flex-direction: column;
 }
 
 /* Search */
@@ -18,90 +32,70 @@
     margin-bottom: 1rem;
 }
 
-/* Layout */
-.layout {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1rem;
+
+.avatar-circle {
+    width: 42px;
+    height: 42px;
+    background: #eef2ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-/* LEFT */
-/* .customer-card {
-    background: #fff;
+.avatar-circle.large {
+    width: 56px;
+    height: 56px;
+}
+
+.avatar-circle lightning-icon {
+    --sds-c-icon-color-foreground-default: #2563eb;
+}
+
+
+.customer-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #ffffff;
     padding: 0.75rem;
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 0.75rem;
     cursor: pointer;
+    transition: background 0.15s ease;
 }
 
 .customer-card:hover {
     background: #f1f5f9;
-} */
-/* 
+}
+
+/* Customer info (90%) */
+.customer-info {
+    flex: 1;
+    min-width: 0;
+}
+
 .cust-name {
     font-weight: 600;
+    font-size: 0.95rem;
+    color: #0f172a;
 }
 
 .cust-email {
     font-size: 0.8rem;
     color: #6b7280;
-} */
-
-.empty-left {
-    text-align: center;
-    /* color: #6b7280; */
+    margin-top: 2px;
+    word-break: break-all;
 }
 
-/* RIGHT */
-.detail-card {
-    background: #fff;
-    padding: 1rem;
-    border-radius: 12px;
-    margin-top: 72px;
-}
 
-.detail-row {
-    margin-top: 0.75rem;
-}
-
-.empty-right {
-    text-align: center;
-    padding: 2rem;
-    font-weight: 400;
-    /* color: #6b7280; */
-}
-
-.right-card{
-      margin-top: 72px;
-}
-.customer-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem;
-    background: #ffffff;
-    border-radius: 10px;
-    margin-bottom: 0.75rem;
-    cursor: pointer;
-}
-
-.customer-card:hover {
-    background: #f1f5f9;
-}
-
-/* LEFT 90% */
-.customer-info {
-    flex: 0 0 90%;
-}
-
-/* RIGHT 10% */
 .status {
-    flex: 0 0 10%;
-    text-align: center;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
     font-weight: 500;
+    white-space: nowrap;
 }
 
 .status.active {
@@ -114,32 +108,99 @@
     color: #374151;
 }
 
-.cust-name {
-    font-weight: 600;
-}
 
-.cust-email {
-    font-size: 0.8rem;
+.empty-left,
+.empty-right {
+    text-align: center;
+    padding: 2rem;
     color: #6b7280;
 }
 
+
 .pagination {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     gap: 0.75rem;
     margin-top: 1rem;
 }
 
 .page-info {
-    font-size: 0.85rem;
-    color: #374151;
+    font-size: 0.8rem;
+    color: #475569;
 }
 
 
-/* Responsive */
+.right-panel {
+    position: sticky;
+    top: 1rem;
+    margin-top: 90px;
+}
+
+
+.detail-card {
+    background: #ffffff;
+    padding: 1.25rem;
+    border-radius: 16px;
+    box-shadow: 0 0 0 1px #e5e7eb;
+}
+
+.detail-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.header-info h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+
+.detail-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.detail-row lightning-icon {
+    margin-top: 2px;
+    --sds-c-icon-color-foreground-default: #64748b;
+}
+
+.label {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 2px;
+}
+
+.value {
+    font-size: 0.95rem;
+    color: #0f172a;
+    line-height: 1.4;
+}
+
+.divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 1.25rem 0;
+}
+
+/* Territory */
+.territory {
+    font-weight: 500;
+}
+
 @media (max-width: 768px) {
     .layout {
         grid-template-columns: 1fr;
+    }
+
+    .right-panel {
+        position: static;
+
     }
 }
