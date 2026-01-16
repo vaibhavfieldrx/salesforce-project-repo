@@ -1,16 +1,15 @@
 <template>
     <div class="page">
 
-        <!-- Header -->
+        <!-- HEADER -->
         <div class="header">
-                <h1>Territory & Customer Management</h1>
-                <p>View and manage customers by sales territory</p>
+            <h1>Territory & Customer Management</h1>
+            <p>View and manage customers by sales territory</p>
         </div>
-    
 
         <div class="layout">
 
-            <!-- LEFT: CUSTOMER LIST -->
+            <!-- ================= LEFT PANEL ================= -->
             <div class="left-panel">
 
                 <!-- Search -->
@@ -21,106 +20,151 @@
                         onchange={handleSearch}>
                     </lightning-input>
                 </div>
-        
+
+                <!-- Customer List -->
                 <template for:each={filteredCustomers} for:item="cust">
-        
-                <div
-                    key={cust.accountId}
-                    class="customer-card"
-                    data-id={cust.accountId}
-                    onclick={selectCustomer}>
+                    <div
+                        key={cust.accountId}
+                        class="customer-card"
+                        data-id={cust.accountId}
+                        onclick={selectCustomer}>
 
-                    <!-- LEFT 90% : Customer Info -->
-                    <div class="customer-info">
-                        <div class="cust-name">
-                            {cust.name}
+                        <!-- Avatar -->
+                        <div class="avatar-circle">
+                            <lightning-icon
+                                icon-name="utility:user"
+                                size="small">
+                            </lightning-icon>
                         </div>
 
-                        <div class="cust-email">
-                            {cust.email}
-                        </div>
-                    </div>
-
-                    <!-- RIGHT 10% : Status -->
-                    <div class={cust.statusClass}>
-                        {cust.status}
-                    </div>
-
-                </div>
-            </template>
-
-            <template if:false={filteredCustomers.length}>
-                 <lightning-card  >
-                     <div class="empty-left">
-                        No customers found
-                    </div>
-                </lightning-card>
-            </template>
-
-            <div class="pagination">
-                <lightning-button
-                    label="Previous"
-                    onclick={handlePrev}
-                    disabled={disablePrev}>
-                </lightning-button>
-
-                <span class="page-info">
-                    Page {currentPage} of {totalPages}
-                </span>
-
-                <lightning-button
-                    label="Next"
-                    onclick={handleNext}
-                    disabled={disableNext}>
-                </lightning-button>
-            </div>
-               
-            </div>
-
-            <!-- RIGHT: CUSTOMER DETAILS -->
-            <div class="right-panel">
-                <template if:true={selectedCustomer}>
-                    <div class="detail-card">
-                        <h2>{selectedCustomer.name}</h2>
-
-                        <div class="detail-row">
-                            <strong>Email:</strong>
-                            {selectedCustomer.email}
+                        <!-- Customer Info -->
+                        <div class="customer-info">
+                            <div class="cust-name">{cust.name}</div>
+                            <div class="cust-email">{cust.email}</div>
                         </div>
 
-                        <div class="detail-row">
-                            <strong>Phone:</strong>
-                            {selectedCustomer.phone}
-                        </div>
-
-                        <div class="detail-row">
-                            <strong>Address:</strong>
-                            {selectedCustomer.address}
-                        </div>
-
-                        <div class="detail-row">
-                            <strong>Territory:</strong>
-                            {selectedCustomer.territory}
+                        <!-- Status -->
+                        <div class={cust.statusClass}>
+                            {cust.status}
                         </div>
                     </div>
                 </template>
 
-                <!-- <template if:false={selectedCustomer}>
-                    <div class="empty-right">
-                        Select a customer to view details
-                    </div>
-                </template> -->
+                <!-- Empty -->
+                <template if:false={filteredCustomers.length}>
+                    <lightning-card>
+                        <div class="empty-left">
+                            No customers found
+                        </div>
+                    </lightning-card>
+                </template>
 
-                 <template if:false={selectedCustomer}>
-                <div class="right-card">
-                 <lightning-card>
-                     <div class="empty-right">
-                         Select a customer to view details
+                <!-- Pagination -->
+                <template if:true={showPagination}>
+                    <div class="pagination">
+                        <lightning-button-icon
+                            icon-name="utility:chevronleft"
+                            onclick={handlePrev}
+                            disabled={disablePrev}>
+                        </lightning-button-icon>
+
+                        <span class="page-info">
+                            Page {currentPage} of {totalPages}
+                        </span>
+
+                        <lightning-button-icon
+                            icon-name="utility:chevronright"
+                            onclick={handleNext}
+                            disabled={disableNext}>
+                        </lightning-button-icon>
                     </div>
-                </lightning-card>
-                </div>
-            </template>
+                </template>
             </div>
+
+            <!-- ================= RIGHT PANEL ================= -->
+      <!-- RIGHT: CUSTOMER DETAILS -->
+<div class="right-panel">
+    <template if:true={selectedCustomer}>
+        <div class="detail-card">
+
+            <!-- Header -->
+            <div class="detail-header">
+                <div class="avatar-circle large">
+                    <lightning-icon
+                        icon-name="utility:user"
+                        size="medium">
+                    </lightning-icon>
+                </div>
+
+                <div class="header-info">
+                    <h2>{selectedCustomer.name}</h2>
+                    <span class={selectedCustomer.statusClass}>
+                        {selectedCustomer.status}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="detail-row">
+                <lightning-icon
+                    icon-name="utility:email"
+                    size="x-small">
+                </lightning-icon>
+
+                <div>
+                    <div class="label">Email</div>
+                    <div class="value">{selectedCustomer.email}</div>
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="detail-row">
+                <lightning-icon
+                    icon-name="utility:call"
+                    size="x-small">
+                </lightning-icon>
+
+                <div>
+                    <div class="label">Phone</div>
+                    <div class="value">{selectedCustomer.phone}</div>
+                </div>
+            </div>
+
+            <!-- Address -->
+            <div class="detail-row">
+                <lightning-icon
+                    icon-name="utility:location"
+                    size="x-small">
+                </lightning-icon>
+
+                <div>
+                    <div class="label">Address</div>
+                    <div class="value">{selectedCustomer.address}</div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider"></div>
+
+            <!-- Territory -->
+            <div class="territory-block">
+                <div class="label">Territory</div>
+                <div class="value territory">
+                    {selectedCustomer.territory}
+                </div>
+            </div>
+
+        </div>
+    </template>
+
+    <template if:false={selectedCustomer}>
+        <lightning-card>
+            <div class="empty-right">
+                Select a customer to view details
+            </div>
+        </lightning-card>
+    </template>
+</div>
 
         </div>
     </div>

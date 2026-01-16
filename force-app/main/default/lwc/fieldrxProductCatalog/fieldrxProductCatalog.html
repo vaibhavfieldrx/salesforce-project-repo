@@ -1,40 +1,117 @@
 <template>
     <div class="catalog-container">
 
-        <!-- Sidebar -->
+        <!-- LEFT SIDEBAR -->
         <div class="sidebar">
-            <input type="search" placeholder="Search products..." onkeyup={handleSearch}/>
+
+            <div class="search-box">
+                <lightning-icon icon-name="utility:search" size="x-small"></lightning-icon>
+                <input type="search" placeholder="Search products..." onkeyup={handleSearch}/>
+            </div>
             
-            <h3>Categories</h3>
-            <ul>
+            <div class="category-title">
+                <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                <span>Categories</span>
+            </div>
+
+            <ul class="category-list">
                 <li class="active">All Categories</li>
                 <li>Widgets</li>
                 <li>Gadgets</li>
                 <li>Components</li>
                 <li>Parts</li>
+                <li>Supplies</li>
+                <li>Modules</li>
+                <li>Units</li>
+                <li>Tools</li>
             </ul>
+
+            <div class="sidebar-footer">
+                <div>Products</div>
+                <div>Active Items</div>
+            </div>
+
         </div>
 
-        <!-- Product Grid -->
+        <!-- PRODUCT GRID -->
         <div class="product-grid">
             <template for:each={products} for:item="prod">
-                <div key={prod.id} class="product-card">
+                <div key={prod.id}
+                     class={prod.cardClass}
+                     data-id={prod.id}
+                     onclick={handleSelect}>
 
-                    <div class="status">
-                        <span if:true={prod.isActive} class="badge active">Active</span>
+                    <!-- Active Badge -->
+                    <span if:true={prod.isActive} class="badge active">Active</span>
+
+                    <!-- Salesforce Product Icon -->
+                    <div class="icon">
+                        <lightning-icon icon-name="standard:product" size="small"></lightning-icon>
                     </div>
 
-                    <div class="icon">📦</div>
-
+                    <!-- Product Info -->
                     <h2>{prod.name}</h2>
                     <p class="code">{prod.code}</p>
                     <span class="category">{prod.category}</span>
 
-                    <div class="price">${prod.price}</div>
-
+                    <!-- Price in Rupees -->
+                    <div class="price">₹ {prod.price}</div>
                 </div>
             </template>
         </div>
+
+        <!-- RIGHT DETAILS PANEL -->
+<div class="details-panel">
+
+    <template if:true={selectedProduct}>
+
+        <!-- Icon Box -->
+        <div class="details-image">
+            <lightning-icon icon-name="standard:product" size="large"></lightning-icon>
+        </div>
+
+        <!-- Name -->
+        <h2 class="details-name">{selectedProduct.name}</h2>
+
+        <!-- Code -->
+        <p class="details-code">{selectedProduct.code}</p>
+
+        <!-- Active Pill -->
+        <span class="details-badge" if:true={selectedProduct.isActive}>
+            Active
+        </span>
+
+        <!-- Price Box -->
+        <div class="details-info-box">
+            <div class="info-left">
+                <lightning-icon icon-name="utility:currency" size="small"></lightning-icon>
+                <span>Price</span>
+            </div>
+            <div class="info-right">
+                ₹ {selectedProduct.price}
+            </div>
+        </div>
+
+        <!-- Category Box -->
+        <div class="details-info-box">
+            <div class="info-left">
+                <lightning-icon icon-name="utility:tag" size="small"></lightning-icon>
+                <span>Category</span>
+            </div>
+            <div class="info-right">
+                {selectedProduct.category}
+            </div>
+        </div>
+
+    </template>
+
+    <template if:false={selectedProduct}>
+        <div class="details-empty">
+            Select a product to view details
+        </div>
+    </template>
+
+</div>
 
     </div>
 </template>

@@ -1,0 +1,172 @@
+<template>
+    <lightning-modal-header label="New Order"></lightning-modal-header>
+
+    <lightning-modal-body>
+        <lightning-record-edit-form
+            object-api-name="Order"
+            onsuccess={handleSuccess}
+            onsave={handleSave}>
+
+            <lightning-messages></lightning-messages>
+
+            <!-- ================= ORDER INFORMATION ================= -->
+            <section class="slds-section slds-is-open">
+                <h3 class="slds-section__title">
+                    <span class="slds-truncate">Order Information</span>
+                </h3>
+
+                <div class="slds-p-around_medium">
+
+                    <!-- Row 1 -->
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Quantity__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="OwnerId"></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="ContractId" required></lightning-input-field>
+
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="OrderNumber"></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <!-- Row 3 -->
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="AccountId" required></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="EffectiveDate" required></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <!-- Row 4 -->
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Order_Amount__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-combobox
+                                label="Order Type"
+                                options={orderTypeOptions}>
+                            </lightning-combobox>
+                        </div>
+                    </div>
+
+                    <!-- Row 5 -->
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Status" required></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Customer_Email__c" required></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <!-- Row 6 -->
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Customer_Mobile__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Product__c"></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <!-- Row 7 -->
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Warehouse__c"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Discount__c"></lightning-input-field>
+                        </div>
+                       
+                    </div>
+                      <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="Discounted_Amount__c"></lightning-input-field>
+                        </div>
+                    </div>
+                     
+
+                    <!-- Billing Address -->
+                    <h4 class="slds-text-title_bold slds-m-top_large">Billing Address</h4>
+
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="BillingCountry"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="BillingState"></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="BillingCity"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="BillingPostalCode"></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <lightning-input-field field-name="BillingStreet"></lightning-input-field>
+
+                    <!-- Shipping Address -->
+                    <h4 class="slds-text-title_bold slds-m-top_large">Shipping Address</h4>
+
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="ShippingCountry"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="ShippingState"></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <div class="slds-grid slds-gutters form-row">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="ShippingCity"></lightning-input-field>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-input-field field-name="ShippingPostalCode"></lightning-input-field>
+                        </div>
+                    </div>
+
+                    <lightning-input-field field-name="ShippingStreet"></lightning-input-field>
+
+                    <!-- Additional Info -->
+                    <lightning-input-field field-name="Field_Executive__c"></lightning-input-field>
+                    <lightning-input-field field-name="OTP__c"></lightning-input-field>
+                    <lightning-input-field field-name="OTP_sent__c" type="checkbox"></lightning-input-field>
+                    <lightning-input-field field-name="Create_Payment__c" type="checkbox"></lightning-input-field>
+                    <lightning-input-field field-name="Year__c" type="date"></lightning-input-field>
+                    <lightning-input-field field-name="Effective_Limit__c"></lightning-input-field>
+                    <lightning-input-field field-name="Generated_OTP__c"></lightning-input-field>
+                    <lightning-input-field field-name="EffectiveDate__c" type="date"></lightning-input-field>
+                    <lightning-input-field field-name="Payment_Status__c"></lightning-input-field>
+                    <lightning-input-field field-name="Custom_Order_Number__c" disabled></lightning-input-field>
+
+                    <h4 class="slds-text-title_bold slds-m-top_large">Description Information</h4>
+                    <lightning-input-field field-name="Description__c"></lightning-input-field>
+
+                </div>
+            </section>
+
+        </lightning-record-edit-form>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" onclick={close}></lightning-button>
+        <lightning-button variant="brand" label="Save" onclick={submitForm}></lightning-button>
+    </lightning-modal-footer>
+</template>

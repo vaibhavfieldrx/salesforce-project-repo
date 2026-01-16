@@ -3,17 +3,18 @@ public with sharing class TerritoryCustomerController {
     @AuraEnabled(cacheable=true)
     public static List<TerritoryWrapper> getTerritoryCustomers() {
 
-        // 🔹 Fetch Active Territories
+        /* ================= TERRITORIES ================= */
+
         List<Territory__c> territories = [
             SELECT
                 Id,
                 Name,
                 Region__c,
                 Owner.Name,
-                Sales_Manager__c,
                 Status_Is_Active__c
             FROM Territory__c
             WHERE Status_Is_Active__c = true
+            ORDER BY Name
         ];
 
         if (territories.isEmpty()) {
@@ -22,7 +23,6 @@ public with sharing class TerritoryCustomerController {
 
         Map<Id, TerritoryWrapper> territoryMap = new Map<Id, TerritoryWrapper>();
 
-        // 🔹 Initialize Territory Wrappers
         for (Territory__c t : territories) {
             territoryMap.put(
                 t.Id,
@@ -35,7 +35,8 @@ public with sharing class TerritoryCustomerController {
             );
         }
 
-        // 🔹 Fetch Accounts linked to Territories
+        /* ================= ACCOUNTS ================= */
+
         List<Account> accounts = [
             SELECT
                 Id,
@@ -50,22 +51,22 @@ public with sharing class TerritoryCustomerController {
                 BillingCountry
             FROM Account
             WHERE Territory__c IN :territoryMap.keySet()
+            ORDER BY Name
         ];
 
-        // 🔹 Map Accounts → Territories
         for (Account acc : accounts) {
 
-            TerritoryWrapper wrapper = territoryMap.get(acc.Territory__c);
-            if (wrapper == null) continue;
+            TerritoryWrapper territory = territoryMap.get(acc.Territory__c);
+            if (territory == null) continue;
 
-            wrapper.customers.add(
+            territory.customers.add(
                 new CustomerWrapper(
                     acc.Id,
                     acc.Name,
                     acc.Email__c,
                     acc.Phone,
-                    acc.Active__c,
-                    wrapper.territoryName,
+                    acc.Active__c,          // Yes / No picklist
+                    territory.territoryName,
                     buildAddress(acc)
                 )
             );
@@ -74,7 +75,7 @@ public with sharing class TerritoryCustomerController {
         return territoryMap.values();
     }
 
-    // ================= HELPERS =================
+    /* ================= HELPERS ================= */
 
     private static String buildAddress(Account acc) {
         List<String> parts = new List<String>();
@@ -95,20 +96,26 @@ public with sharing class TerritoryCustomerController {
         return String.join(parts, ', ');
     }
 
-    // ================= WRAPPERS =================
+    /* ================= WRAPPERS ================= */
 
     public class TerritoryWrapper {
         @AuraEnabled public Id territoryId;
         @AuraEnabled public String territoryName;
         @AuraEnabled public String region;
         @AuraEnabled public String manager;
-        @AuraEnabled public List<CustomerWrapper> customers = new List<CustomerWrapper>();
+        @AuraEnabled public List<CustomerWrapper> customers;
 
-        public TerritoryWrapper(Id id, String name, String reg, String mgr) {
-            territoryId = id;
-            territoryName = name;
-            region = reg;
-            manager = mgr;
+        public TerritoryWrapper(
+            Id territoryId,
+            String territoryName,
+            String region,
+            String manager
+        ) {
+            this.territoryId = territoryId;
+            this.territoryName = territoryName;
+            this.region = region;
+            this.manager = manager;
+            this.customers = new List<CustomerWrapper>();
         }
     }
 
@@ -117,26 +124,26 @@ public with sharing class TerritoryCustomerController {
         @AuraEnabled public String name;
         @AuraEnabled public String email;
         @AuraEnabled public String phone;
-        @AuraEnabled public String status;
+        @AuraEnabled public String activeFlag; // Yes / No
         @AuraEnabled public String territory;
         @AuraEnabled public String address;
 
         public CustomerWrapper(
-            Id id,
-            String n,
-            String e,
-            String p,
-            String active,
-            String t,
-            String addr
+            Id accountId,
+            String name,
+            String email,
+            String phone,
+            String activeFlag,
+            String territory,
+            String address
         ) {
-            accountId = id;
-            name = n;
-            email = e;
-            phone = p;
-            status = active;
-            territory = t;
-            address = addr;
+            this.accountId = accountId;
+            this.name = name;
+            this.email = email;
+            this.phone = phone;
+            this.activeFlag = activeFlag;
+            this.territory = territory;
+            this.address = address;
         }
     }
 }

@@ -1,7 +1,15 @@
 import { LightningElement, wire } from 'lwc';
 import getDashboardData from '@salesforce/apex/OrderManagementController.getDashboardData';
+import NewOrderModal from 'c/newOrderModal';
 
 export default class OrderList extends LightningElement {
+
+    async openModal() { 
+        await NewOrderModal.open({
+            size: 'full', // small | medium | large | full
+            description: 'Create New Order'
+        });
+    }
 
     // ---------- STATE ----------
     orders = [];
