@@ -1,51 +1,50 @@
 public with sharing class FieldRx_ProductController {
 
-    @AuraEnabled(cacheable=true)
-    public static List<ProductWrapper> getProducts() {
-
-        if (!Schema.sObjectType.Product2.isAccessible()) {
-            throw new AuraHandledException('User does not have access to Products');
-        }
-        if (!Schema.sObjectType.PricebookEntry.isAccessible()) {
-            throw new AuraHandledException('User does not have access to Pricebook Entries');
-        }
-
-        List<Product2> products = [
-            SELECT Id, Name, ProductCode, Family, IsActive,
-            (SELECT UnitPrice FROM PricebookEntries 
-             WHERE Pricebook2.IsStandard = true LIMIT 1)
-            FROM Product2
-            WHERE IsActive = true
-        ];
-
-        List<ProductWrapper> result = new List<ProductWrapper>();
-
-        for (Product2 p : products) {
-            ProductWrapper pw = new ProductWrapper();
-            pw.id = p.Id;
-            pw.name = p.Name;
-            pw.code = p.ProductCode;
-            pw.category = p.Family;
-            pw.isActive = p.IsActive;
-            pw.price = 0;
-
-            if (!p.PricebookEntries.isEmpty()) {
-                pw.price = p.PricebookEntries[0].UnitPrice;
-            }
-
-            result.add(pw);
-        }
-
-        return result;
-    }
-
-   
     public class ProductWrapper {
-        @AuraEnabled public Id id;
+        @AuraEnabled public String id;
         @AuraEnabled public String name;
         @AuraEnabled public String code;
-        @AuraEnabled public String category;
-        @AuraEnabled public Decimal price;
+        @AuraEnabled public String category;   // Category from Product Family
         @AuraEnabled public Boolean isActive;
+        @AuraEnabled public Decimal price;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<ProductWrapper> getAllProducts() {
+
+        if (!Schema.sObjectType.PricebookEntry.isAccessible() ||
+            !Schema.sObjectType.Product2.isAccessible()) {
+            throw new AuraHandledException('Access denied');
+        }
+
+        List<ProductWrapper> results = new List<ProductWrapper>();
+
+        List<PricebookEntry> entries = [
+    SELECT Product2.Id,
+           Product2.Name,
+           Product2.ProductCode,
+           Product2.Family,
+           Product2.IsActive,
+           UnitPrice
+    FROM PricebookEntry
+    WHERE Pricebook2.IsStandard = true
+    AND Product2.IsActive = true
+    AND Product2.Family != NULL
+];
+
+        for(PricebookEntry pbe : entries){
+    System.debug('CATEGORY FROM APEX = ' + pbe.Product2.Family);
+
+    ProductWrapper pw = new ProductWrapper();
+    pw.id = pbe.Product2.Id;
+    pw.name = pbe.Product2.Name;
+    pw.code = pbe.Product2.ProductCode;
+    pw.category = pbe.Product2.Family;
+    pw.isActive = pbe.Product2.IsActive;
+    pw.price = pbe.UnitPrice;
+    results.add(pw);
+}
+
+        return results;
     }
 }

@@ -1,14 +1,10 @@
-/**
- * An apex page controller that exposes the site login functionality
- */
 global with sharing class SiteLoginController {
-    global String username {get; set;}
-    global String password {get; set;}
-
-    global PageReference login() {
-        String startUrl = System.currentPageReference().getParameters().get('startURL');
-        return Site.login(username, password, startUrl);
+    @AuraEnabled
+    public static void login(String username, String password) {
+        try {
+            Site.login(username, password, '/s/order');
+        } catch (Exception e) {
+            throw new AuraHandledException('Invalid username or password.');
+        }
     }
-    
-   	global SiteLoginController () {}
 }

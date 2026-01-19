@@ -1,0 +1,40 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-16-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="login-page">
+        <div class="login-card">
+            <div class="logo">
+                <h1>Welcome Back</h1>
+                <p>Please sign in to continue</p>
+            </div>
+
+            <lightning-input
+                label="Username"
+                value={username}
+                onchange={handleUsername}
+                class="input">
+            </lightning-input>
+
+            <lightning-input
+                label="Password"
+                type="password"
+                value={password}
+                onchange={handlePassword}
+                class="input">
+            </lightning-input>
+
+            <button class="login-btn" onclick={handleLogin}>
+                Login
+            </button>
+
+            <template if:true={errorMessage}>
+                <p class="error">{errorMessage}</p>
+            </template>
+        </div>
+    </div>
+</template>

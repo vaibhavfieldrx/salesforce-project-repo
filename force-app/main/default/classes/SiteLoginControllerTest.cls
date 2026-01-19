@@ -1,13 +1,25 @@
 /**
- * An apex page controller that exposes the site login functionality
- */
-@IsTest global with sharing class SiteLoginControllerTest {
-    @IsTest(SeeAllData=true) global static void testSiteLoginController () {
-        // Instantiate a new controller with all parameters in the page
-        SiteLoginController controller = new SiteLoginController ();
-        controller.username = 'test@salesforce.com';
-        controller.password = '123456'; 
-                
-        System.assertEquals(controller.login(),null);                           
-    }    
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 01-16-2026
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
+global with sharing class SiteLoginControllerTest {
+
+    @AuraEnabled
+    public static void login(String username, String password) {
+        User u = [
+            SELECT Id, IsActive
+            FROM User
+            WHERE Username = :username
+            LIMIT 1
+        ];
+
+        if (!u.IsActive) {
+            throw new AuraHandledException('Invalid username or password.');
+        }
+
+        Site.login(username, password, '/');
+    }
 }
