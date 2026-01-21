@@ -1,15 +1,9 @@
 import { LightningElement, wire } from 'lwc';
 import getDashboardData from '@salesforce/apex/OrderManagementController.getDashboardData';
-import NewOrderModal from 'c/newOrderModal';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class OrderList extends LightningElement {
 
-    async openModal() { 
-        await NewOrderModal.open({
-            size: 'full', // small | medium | large | full
-            description: 'Create New Order'
-        });
-    }
+export default class OrderManagement extends NavigationMixin(LightningElement) {
 
     // ---------- STATE ----------
     orders = [];
@@ -21,7 +15,15 @@ export default class OrderList extends LightningElement {
     currentPage = 1;
     totalOrders = 0;
 
-    // ---------- APEX ----------
+    openNewOrderModal() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+             attributes: {
+                url: '/createorder'
+            }
+        });
+    }
+
     @wire(getDashboardData, {
         pageSize: '$pageSize',
         pageNumber: '$currentPage'
@@ -31,7 +33,6 @@ export default class OrderList extends LightningElement {
             this.revenue = data.revenue;
             this.totalOrders = data.totalOrders;
 
-            // Orders mapping
             this.orders = data.orders.map(o => ({
                 id: o.Id,
                 number: o.OrderNumber,
@@ -41,21 +42,11 @@ export default class OrderList extends LightningElement {
                 status: o.Status,
                 statusClass: this.getStatusClass(o.Status)
             }));
-
-            // Summary cards
-            this.summaryList = Object.keys(data.summary || {}).map(key => ({
-                label: key,
-                count: data.summary[key],
-                iconName: this.getSummaryIcon(key),
-                iconClass: this.getIconClass(key),
-                wrapperClass: `icon-wrapper ${this.getIconClass(key)}`
-            }));
         } else if (error) {
-            console.error('Dashboard Error', error);
+            console.error(error);
         }
     }
 
-    // ---------- PAGINATION HELPERS ----------
     get totalPages() {
         return Math.ceil(this.totalOrders / this.pageSize);
     }
@@ -69,18 +60,13 @@ export default class OrderList extends LightningElement {
     }
 
     nextPage() {
-        if (!this.isLastPage) {
-            this.currentPage++;
-        }
+        if (!this.isLastPage) this.currentPage++;
     }
 
     prevPage() {
-        if (!this.isFirstPage) {
-            this.currentPage--;
-        }
+        if (!this.isFirstPage) this.currentPage--;
     }
 
-    // ---------- UI HELPERS ----------
     getStatusClass(status) {
         if (status === 'Delivered') return 'badge delivered';
         if (status === 'Approved') return 'badge processing';
@@ -88,18 +74,5 @@ export default class OrderList extends LightningElement {
         if (status === 'Cancelled') return 'badge cancelled';
         if (status === 'Reject') return 'badge rejected';
         return 'badge pending';
-    }
-
-    getSummaryIcon() {
-        return 'utility:event';
-    }
-
-    getIconClass(status) {
-        if (status === 'Delivered') return 'green-icon';
-        if (status === 'Approved') return 'orange-icon';
-        if (status === 'Returned') return 'blue-icon';
-        if (status === 'Cancelled') return 'red-icon';
-        if (status === 'Reject') return 'yellow-icon';
-        return 'gray-icon';
     }
 }

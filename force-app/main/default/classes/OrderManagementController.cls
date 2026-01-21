@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 01-13-2026
+ * @last modified on  : 01-21-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class OrderManagementController {
@@ -61,4 +61,25 @@ public with sharing class OrderManagementController {
             'totalOrders' => totalOrders
         };
     }
+
+
+ @AuraEnabled(cacheable=true)
+public static List<Account> getCustomers() {
+    return [
+        SELECT Id, Name
+        FROM Account
+        ORDER BY Name
+        LIMIT 200
+    ];
+}
+
+@AuraEnabled(cacheable=true)
+public static Account getCustomerDetails(Id customerId) {
+    return [
+        SELECT Name, Phone, Email__c
+        FROM Account
+        WHERE Id = :customerId
+        LIMIT 1
+    ];
+}   
 }
