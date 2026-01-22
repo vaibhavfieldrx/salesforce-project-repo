@@ -82,4 +82,13 @@ public static Account getCustomerDetails(Id customerId) {
         LIMIT 1
     ];
 }   
+
+@AuraEnabled(cacheable=true)
+    public static List<Warehouse__c> getWarehouses() {
+        return [
+            SELECT Id, Name
+            FROM Warehouse__c
+            ORDER BY Name
+        ];
+    }
 }

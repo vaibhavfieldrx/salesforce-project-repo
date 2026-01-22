@@ -1,23 +1,16 @@
-.card {
-    background: #fff;
-    border-radius: 14px;
+.page {
     padding: 20px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-.section-title {
-    font-size: 18px;
+.header {
+    margin-bottom: 20px;
+}
+
+.title {
+    font-size: 26px;
     font-weight: 600;
-    margin-bottom: 14px;
 }
 
-.field {
-    margin-top: 10px;
-}
-
-.label {
-    display: block;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 6px;
+.desc {
+    color: #6b7280;
 }

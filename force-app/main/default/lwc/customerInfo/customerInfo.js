@@ -4,10 +4,14 @@ import getCustomerDetails from '@salesforce/apex/OrderManagementController.getCu
 export default class CustomerInfo extends LightningElement {
 
     @api customerId;
-    customer = {};
+    customer;
 
     @wire(getCustomerDetails, { customerId: '$customerId' })
-    wiredCustomer({ data }) {
-        if (data) this.customer = data;
+    wiredCustomer({ data, error }) {
+        if (data) {
+            this.customer = data;
+        } else if (error) {
+            console.error(error);
+        }
     }
 }

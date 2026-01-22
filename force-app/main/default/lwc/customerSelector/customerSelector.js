@@ -6,12 +6,14 @@ export default class CustomerSelector extends LightningElement {
     options = [];
 
     @wire(getCustomers)
-    wiredCustomers({ data }) {
+    wiredCustomers({ data, error }) {
         if (data) {
             this.options = data.map(c => ({
                 label: c.Name,
                 value: c.Id
             }));
+        } else if (error) {
+            console.error(error);
         }
     }
 

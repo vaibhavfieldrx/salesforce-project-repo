@@ -7,10 +7,12 @@
 -->
 <template>
     <div class="card">
-        <h2>Customer Details</h2>
+        <h2 class="card-title">Selected Customer</h2>
 
-        <p><b>Name:</b> {customer.Name}</p>
-        <p><b>Email:</b> {customer.PersonEmail}</p>
-        <p><b>Phone:</b> {customer.Phone}</p>
+        <template if:true={customer}>
+            <p><b>Name:</b> {customer.Name}</p>
+            <p><b>Email:</b> {customer.PersonEmail}</p>
+            <p><b>Phone:</b> {customer.Phone}</p>
+        </template>
     </div>
 </template>

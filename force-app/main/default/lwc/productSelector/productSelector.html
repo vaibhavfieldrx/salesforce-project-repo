@@ -1,0 +1,66 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-21-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="card">
+        <h2>Select Products</h2>
+
+        <lightning-datatable
+            key-field="id"
+            data={products}
+            columns={columns}
+            onrowselection={handleRowSelection}
+            selected-rows={selectedRowIds}>
+        </lightning-datatable>
+
+        <div class="footer" style="margin-top: 1rem;">
+            <lightning-button
+                label="Add Selected Products"
+                variant="brand"
+                onclick={handleAddSelected}>
+            </lightning-button>
+        </div>
+
+        <!-- Show selected products table ONLY after clicking "Add Selected Products" -->
+        <template if:true={showSelectedProducts}>
+            <div style="margin-top: 1rem;">
+                <h3>Selected Products:</h3>
+                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={selectedProducts} for:item="prod">
+                            <tr key={prod.id}>
+                                <td>{prod.name}</td>
+                                <td>${prod.price}</td>
+                                <td>
+                                    <lightning-input
+                                        type="number"
+                                        min="1"
+                                        value={prod.qty}
+                                        data-id={prod.id}
+                                        onchange={handleQtyChange}>
+                                    </lightning-input>
+                                </td>
+                                <td>${prod.subtotal}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <div style="margin-top: 0.5rem; font-weight: bold;">
+                    Total: ${totalAmount}
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

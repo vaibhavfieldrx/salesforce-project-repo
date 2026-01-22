@@ -1,0 +1,26 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-21-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="card">
+        <h2>Order Summary</h2>
+
+        <p>Total: <b>${total}</b></p>
+
+        <lightning-input
+            type="number"
+            label="Discount"
+            onchange={handleDiscount}>
+        </lightning-input>
+
+        <lightning-combobox
+            label="Payment Status"
+            value={paymentStatus}
+            options={options}>
+        </lightning-combobox>
+    </div>
+</template>

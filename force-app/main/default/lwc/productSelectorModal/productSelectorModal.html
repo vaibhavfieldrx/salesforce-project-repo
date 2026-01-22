@@ -1,0 +1,51 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-21-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-modal-header label="Add Products"></lightning-modal-header>
+
+    <lightning-modal-body>
+        <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+            <thead>
+                <tr>
+                    <th>Select</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template for:each={products} for:item="p">
+                    <tr key={p.id}>
+                        <td>
+                            <input
+                                type="checkbox"
+                                data-id={p.id}
+                                onchange={handleCheckboxChange}>
+                        </td>
+                        <td>{p.name}</td>
+                        <td>${p.price}</td>
+                        <td>
+                            <lightning-input
+                                type="number"
+                                value={p.qty}
+                                data-id={p.id}
+                                onchange={updateQty}
+                                min="1">
+                            </lightning-input>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" onclick={closeModal}></lightning-button>
+        <lightning-button variant="brand" label="Add" onclick={confirm}></lightning-button>
+    </lightning-modal-footer>
+</template>
