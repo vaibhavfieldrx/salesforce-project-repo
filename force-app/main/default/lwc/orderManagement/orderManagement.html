@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-13-2026
+  @last modified on  : 01-22-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -13,7 +13,9 @@
                 <h1 class="title">Order Management</h1>
                 <p class="desc">Create and manage customer orders</p>
             </div>
-            <button class="primary">+ New Order</button>
+           <button class="primary" onclick={openNewOrderModal}>
+    + New Order
+</button>
         </div>
 
         <div class="content">

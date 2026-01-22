@@ -1,0 +1,16 @@
+.page {
+    padding: 20px;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.title {
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.desc {
+    color: #6b7280;
+}

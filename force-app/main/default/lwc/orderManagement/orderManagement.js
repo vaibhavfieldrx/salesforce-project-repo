@@ -1,7 +1,9 @@
 import { LightningElement, wire } from 'lwc';
 import getDashboardData from '@salesforce/apex/OrderManagementController.getDashboardData';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class OrderList extends LightningElement {
+
+export default class OrderManagement extends NavigationMixin(LightningElement) {
 
     // ---------- STATE ----------
     orders = [];
@@ -18,6 +20,15 @@ export default class OrderList extends LightningElement {
     selectedStatus = ''; // All
 
     // ---------- APEX ----------
+    openNewOrderModal() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+             attributes: {
+                url: '/createorder'
+            }
+        });
+    }
+
     @wire(getDashboardData, {
         pageSize: '$pageSize',
         pageNumber: '$currentPage',
@@ -95,7 +106,6 @@ export default class OrderList extends LightningElement {
         ];
     }
 
-    // ---------- UI HELPERS ----------
     getStatusClass(status) {
         if (status === 'Delivered') return 'badge delivered';
         if (status === 'Approved') return 'badge processing';

@@ -1,0 +1,39 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-21-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="page">
+
+        <h1 class="title">Create New Order</h1>
+
+        <c-customer-selector oncustomerselect={handleCustomer}></c-customer-selector>
+
+        <template if:true={customerId}>
+            <c-customer-info customer-id={customerId}></c-customer-info>
+          <c-order-address-and-warehouse></c-order-address-and-warehouse>
+
+          <c-product-selector
+    onproductsselected={handleProductsSelected}>
+</c-product-selector>
+
+            <c-order-summary
+                total={total}
+                discount={discount}
+                payment-status={paymentStatus}>
+            </c-order-summary>
+
+            <lightning-button
+                variant="brand"
+                label="Create Order"
+                onclick={createOrder}>
+            </lightning-button>
+
+            <c-previous-orders customer-id={customerId}></c-previous-orders>
+        </template>
+
+    </div>
+</template>

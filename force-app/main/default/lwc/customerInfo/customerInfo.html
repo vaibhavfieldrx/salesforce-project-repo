@@ -1,0 +1,18 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-21-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="card">
+        <h2 class="card-title">Selected Customer</h2>
+
+        <template if:true={customer}>
+            <p><b>Name:</b> {customer.Name}</p>
+            <p><b>Email:</b> {customer.PersonEmail}</p>
+            <p><b>Phone:</b> {customer.Phone}</p>
+        </template>
+    </div>
+</template>

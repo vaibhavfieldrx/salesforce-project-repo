@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 01-22-2026
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class OrderManagementController {
 
     @AuraEnabled(cacheable=true)
@@ -83,5 +90,35 @@ public with sharing class OrderManagementController {
             'summary' => summary,
             'revenue' => revenue
         };
+    }
+
+
+    @AuraEnabled(cacheable=true)
+public static List<Account> getCustomers() {
+    return [
+        SELECT Id, Name
+        FROM Account
+        ORDER BY Name
+        LIMIT 200
+    ];
+}
+
+@AuraEnabled(cacheable=true)
+public static Account getCustomerDetails(Id customerId) {
+    return [
+        SELECT Name, Phone, Email__c
+        FROM Account
+        WHERE Id = :customerId
+        LIMIT 1
+    ];
+}   
+
+@AuraEnabled(cacheable=true)
+    public static List<Warehouse__c> getWarehouses() {
+        return [
+            SELECT Id, Name
+            FROM Warehouse__c
+            ORDER BY Name
+        ];
     }
 }
