@@ -9,21 +9,26 @@ export default class OrderList extends LightningElement {
     revenue = 0;
 
     // ---------- PAGINATION ----------
-    pageSize = 7;
+    pageSize = 10;
     currentPage = 1;
     totalOrders = 0;
+
+    // ---------- SEARCH & FILTER ----------
+    searchKey = '';
+    selectedStatus = ''; // All
 
     // ---------- APEX ----------
     @wire(getDashboardData, {
         pageSize: '$pageSize',
-        pageNumber: '$currentPage'
+        pageNumber: '$currentPage',
+        searchKey: '$searchKey',
+        status: '$selectedStatus'
     })
     wiredData({ data, error }) {
         if (data) {
             this.revenue = data.revenue;
             this.totalOrders = data.totalOrders;
 
-            // Orders mapping
             this.orders = data.orders.map(o => ({
                 id: o.Id,
                 number: o.OrderNumber,
@@ -34,20 +39,30 @@ export default class OrderList extends LightningElement {
                 statusClass: this.getStatusClass(o.Status)
             }));
 
-            // Summary cards
             this.summaryList = Object.keys(data.summary || {}).map(key => ({
                 label: key,
                 count: data.summary[key],
-                iconName: this.getSummaryIcon(key),
-                iconClass: this.getIconClass(key),
+                iconName: 'utility:event',
                 wrapperClass: `icon-wrapper ${this.getIconClass(key)}`
             }));
         } else if (error) {
-            console.error('Dashboard Error', error);
+            console.error(error);
         }
     }
 
-    // ---------- PAGINATION HELPERS ----------
+    // ---------- SEARCH ----------
+    handleSearch(event) {
+        this.searchKey = event.target.value;
+        this.currentPage = 1;
+    }
+
+    // ---------- STATUS FILTER ----------
+    handleStatusChange(event) {
+        this.selectedStatus = event.detail.value;
+        this.currentPage = 1;
+    }
+
+    // ---------- PAGINATION ----------
     get totalPages() {
         return Math.ceil(this.totalOrders / this.pageSize);
     }
@@ -61,15 +76,23 @@ export default class OrderList extends LightningElement {
     }
 
     nextPage() {
-        if (!this.isLastPage) {
-            this.currentPage++;
-        }
+        if (!this.isLastPage) this.currentPage++;
     }
 
     prevPage() {
-        if (!this.isFirstPage) {
-            this.currentPage--;
-        }
+        if (!this.isFirstPage) this.currentPage--;
+    }
+
+    // ---------- STATUS OPTIONS ----------
+    get statusOptions() {
+        return [
+            { label: 'All', value: '' },
+            { label: 'Delivered', value: 'Delivered' },
+            { label: 'Approved', value: 'Approved' },
+            { label: 'Returned', value: 'Returned' },
+            { label: 'Cancelled', value: 'Cancelled' },
+            { label: 'Rejected', value: 'Reject' }
+        ];
     }
 
     // ---------- UI HELPERS ----------
@@ -80,10 +103,6 @@ export default class OrderList extends LightningElement {
         if (status === 'Cancelled') return 'badge cancelled';
         if (status === 'Reject') return 'badge rejected';
         return 'badge pending';
-    }
-
-    getSummaryIcon() {
-        return 'utility:event';
     }
 
     getIconClass(status) {

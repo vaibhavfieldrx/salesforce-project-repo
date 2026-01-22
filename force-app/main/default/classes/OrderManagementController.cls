@@ -1,49 +1,69 @@
-/**
- * @description       : 
- * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             : 
- * @last modified on  : 01-13-2026
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
-**/
 public with sharing class OrderManagementController {
 
     @AuraEnabled(cacheable=true)
     public static Map<String, Object> getDashboardData(
         Integer pageSize,
-        Integer pageNumber
+        Integer pageNumber,
+        String searchKey,
+        String status
     ) {
+
         Integer offsetVal = (pageNumber - 1) * pageSize;
 
-        // 1️⃣ Orders with pagination
-        List<Order> orders = [
-            SELECT Id, OrderNumber, Status, TotalAmount, EffectiveDate,
-                   Account.Name
-            FROM Order
-            ORDER BY CreatedDate DESC
-            LIMIT :pageSize
-            OFFSET :offsetVal
-        ];
+        /* =========================
+           🔹 DYNAMIC WHERE CLAUSE
+        ========================== */
+        String whereClause = ' WHERE Id != null ';
 
-        // 2️⃣ Total orders count (for pagination)
-        Integer totalOrders = [
-            SELECT COUNT()
-            FROM Order
-        ];
+        if (!String.isBlank(searchKey)) {
+            whereClause += ' AND Account.Name LIKE \'%' +
+                String.escapeSingleQuotes(searchKey) + '%\'';
+        }
 
-        // 3️⃣ Status summary
+        if (!String.isBlank(status)) {
+            whereClause += ' AND Status = :status';
+        }
+
+        /* =========================
+           🔹 ORDERS (TABLE DATA)
+        ========================== */
+        String orderQuery =
+            'SELECT Id, OrderNumber, Status, TotalAmount, EffectiveDate, Account.Name ' +
+            'FROM Order ' +
+            whereClause +
+            ' ORDER BY CreatedDate DESC ' +
+            ' LIMIT :pageSize OFFSET :offsetVal';
+
+        List<Order> orders = Database.query(orderQuery);
+
+        /* =========================
+           🔹 TOTAL COUNT (PAGINATION)
+        ========================== */
+        String countQuery =
+            'SELECT COUNT() FROM Order ' + whereClause;
+
+        Integer totalOrders = Database.countQuery(countQuery);
+
+        /* =========================
+           🔹 ORDER SUMMARY (RIGHT PANEL)
+           ⚠️ Summary should NOT be filtered
+        ========================== */
         Map<String, Integer> summary = new Map<String, Integer>();
         for (AggregateResult ar : [
-            SELECT Status status, COUNT(Id) cnt
+            SELECT Status, COUNT(Id) cnt
             FROM Order
             GROUP BY Status
         ]) {
             summary.put(
-                (String) ar.get('status'),
+                (String) ar.get('Status'),
                 (Integer) ar.get('cnt')
             );
         }
 
-        // 4️⃣ Total revenue
+        /* =========================
+           🔹 ANNUAL / TOTAL REVENUE
+           ⚠️ No filter, no pagination
+        ========================== */
         Decimal revenue = 0;
         AggregateResult rev = [
             SELECT SUM(TotalAmount) total
@@ -54,11 +74,14 @@ public with sharing class OrderManagementController {
             revenue = (Decimal) rev.get('total');
         }
 
+        /* =========================
+           🔹 FINAL RESPONSE
+        ========================== */
         return new Map<String, Object>{
             'orders' => orders,
+            'totalOrders' => totalOrders,
             'summary' => summary,
-            'revenue' => revenue,
-            'totalOrders' => totalOrders
+            'revenue' => revenue
         };
     }
 }

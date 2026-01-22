@@ -21,15 +21,35 @@
             <!-- TABLE -->
      <div class="card table-card">
     <h2 class="title-2">All Orders</h2>
+<!-- FILTER BAR -->
+<div class="filter-bar">
+    <!-- Search -->
+    <lightning-input
+        type="search"
+        placeholder="Search Orders"
+        value={searchKey}
+        onchange={handleSearch}>
+    </lightning-input>
+
+    <!-- Status Filter -->
+    <lightning-combobox
+        label="Status"
+        value={selectedStatus}
+        options={statusOptions}
+        onchange={handleStatusChange}>
+    </lightning-combobox>
+</div>
 
     <table>
         <thead>
             <tr>
-                <th>ORDER ID</th>
-                <th>CUSTOMER</th>
-                <th>DATE</th>
-                <th>STATUS</th>
-                <th class="right">TOTAL</th>
+                <th>Order Number </th>
+                <th>Customer Name</th>
+                <th>Order Amount</th>
+                <th>Order Created Date</th>
+                <th>Status</th>
+                <th>Action</th>
+                
             </tr>
         </thead>
         <tbody>
@@ -37,11 +57,24 @@
                 <tr key={o.id}>
                     <td>#{o.number}</td>
                     <td>{o.customer}</td>
+                    <td >₹{o.amount}</td>
                     <td>{o.date}</td>
                     <td>
                         <span class={o.statusClass}>{o.status}</span>
                     </td>
-                    <td class="right">₹{o.amount}</td>
+                    <td class="right">
+                    <lightning-button-menu
+                        alternative-text="Actions"
+                        icon-size="small"
+                        onselect={handleAction}
+                        data-id={o.id}>
+
+                        <lightning-menu-item value="view" label="View"></lightning-menu-item>
+                        <lightning-menu-item value="edit" label="Edit"></lightning-menu-item>
+                        <lightning-menu-item value="delete" label="Delete"></lightning-menu-item>
+
+                    </lightning-button-menu>
+                </td>
                 </tr>
             </template>
         </tbody>
@@ -73,7 +106,7 @@
                     <template for:each={summaryList} for:item="s">
                         <div key={s.label} class="summary-row">
                             <div class="under-icon">
-                                <div class={wrapperClass}>
+                                <div class={s.wrapperClass}>
                                     <lightning-icon icon-name={s.iconName} size="x-small" class={s.iconClass}>
                                     </lightning-icon>
                                 </div>
