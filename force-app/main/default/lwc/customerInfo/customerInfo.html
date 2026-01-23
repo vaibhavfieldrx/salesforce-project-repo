@@ -2,17 +2,29 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-21-2026
+  @last modified on  : 01-23-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-    <div class="card">
-        <h2 class="card-title">Selected Customer</h2>
+    <template if:true={customer}>
+        <div class="customer-card">
+            <div class="avatar">
+                <lightning-icon
+                    icon-name="standard:account"
+                    size="small">
+                </lightning-icon>
+            </div>
 
-        <template if:true={customer}>
-            <p><b>Name:</b> {customer.Name}</p>
-            <p><b>Email:</b> {customer.PersonEmail}</p>
-            <p><b>Phone:</b> {customer.Phone}</p>
-        </template>
-    </div>
+            <div class="details">
+    <p class="name">{customer.Name}</p>
+    <p class="email">{customer.Email__c}</p>
+
+    <p class="address">
+        {street}
+        <template if:true={city}>, {city}</template>
+        <template if:true={country}>, {country}</template>
+    </p>
+</div>
+        </div>
+    </template>
 </template>

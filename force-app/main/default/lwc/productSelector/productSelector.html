@@ -2,65 +2,212 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-21-2026
+  @last modified on  : 01-23-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
     <div class="card">
-        <h2>Select Products</h2>
 
-        <lightning-datatable
-            key-field="id"
-            data={products}
-            columns={columns}
-            onrowselection={handleRowSelection}
-            selected-rows={selectedRowIds}>
-        </lightning-datatable>
-
-        <div class="footer" style="margin-top: 1rem;">
-            <lightning-button
-                label="Add Selected Products"
-                variant="brand"
-                onclick={handleAddSelected}>
-            </lightning-button>
+        <!-- HEADER -->
+        <div class="header">
+            <h2 class="section-title">Add Products</h2>
+            <p class="subtitle">Select products and define quantity</p>
         </div>
 
-        <!-- Show selected products table ONLY after clicking "Add Selected Products" -->
-        <template if:true={showSelectedProducts}>
-            <div style="margin-top: 1rem;">
-                <h3>Selected Products:</h3>
-                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Qty</th>
-                            <th>Subtotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template for:each={selectedProducts} for:item="prod">
-                            <tr key={prod.id}>
-                                <td>{prod.name}</td>
-                                <td>${prod.price}</td>
-                                <td>
-                                    <lightning-input
-                                        type="number"
-                                        min="1"
-                                        value={prod.qty}
-                                        data-id={prod.id}
-                                        onchange={handleQtyChange}>
-                                    </lightning-input>
-                                </td>
-                                <td>${prod.subtotal}</td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-                <div style="margin-top: 0.5rem; font-weight: bold;">
-                    Total: ${totalAmount}
+        <!-- PRODUCT GRID -->
+        <div class="product-grid">
+            <template for:each={products} for:item="prod">
+                <div key={prod.id} class="product-card">
+                    <lightning-input
+                        type="checkbox"
+                        checked={prod.selected}
+                        data-id={prod.id}
+                        onchange={handleSelect}>
+                    </lightning-input>
+
+                    <div class="info">
+                        <h3>{prod.name}</h3>
+                        <p class="code">{prod.productCode}</p>
+                        <p class="price">₹{prod.price}</p>
+                    </div>
                 </div>
+            </template>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="pagination">
+            <lightning-button-icon
+                icon-name="utility:chevronleft"
+                variant="bare"
+                onclick={handlePrev}
+                disabled={isFirstPage}
+                alternative-text="Previous">
+            </lightning-button-icon>
+
+            <span class="page-info">
+                Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong>
+            </span>
+
+            <lightning-button-icon
+                icon-name="utility:chevronright"
+                variant="bare"
+                onclick={handleNext}
+                disabled={isLastPage}
+                alternative-text="Next">
+            </lightning-button-icon>
+        </div>
+
+        <!-- SELECTED PRODUCTS -->
+   <template if:true={selectedProducts.length}>
+    <div class="order-card">
+        <h3 class="order-title">Order Items</h3>
+
+        <template for:each={selectedProducts} for:item="p">
+            <div key={p.id} class="order-row">
+
+                <div class="order-info">
+                    <div class="order-name">{p.name}</div>
+                    <div class="main-div-order">
+<!-- Qty with styled input -->
+                    <div class="order-meta">
+                        Qty:
+                        <div class="input-wrapper">
+                            <input 
+                                type="number" 
+                                min="1" 
+                                value={p.qty} 
+                                data-id={p.id} 
+                                onchange={handleQtyChange}
+                                class="styled-input"
+                            />
+                            <span class="input-addon"> × ₹{p.price}</span>
+                        </div>
+                    </div>
+
+                    <!-- Discount with styled input -->
+                    <div class="order-discount">
+                        Discount (₹):
+                        <div class="input-wrapper">
+                            <input
+                                type="number"
+                                min="0"
+                                value={p.discount}
+                                data-id={p.id}
+                                onchange={handleDiscountChange}
+                                class="styled-input"
+                            />
+                        </div>
+                    </div>
+                    </div>
+                    
+                </div>
+
+                <div class="order-right">
+                    <div class="order-price">{p.displaySubtotal}</div>
+
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        variant="bare"
+                        alternative-text="Remove"
+                        data-id={p.id}
+                        onclick={handleRemoveItem}
+                        class="remove-btn">
+                    </lightning-button-icon>
+                </div>
+
             </div>
         </template>
+
+        <!-- ORDER TOTAL -->
+        <div class="order-total">
+            <span>Total</span>
+            <span class="total-amount">₹{totalAmount}</span>
+        </div>
     </div>
 </template>
+
+<div class="payment-status">
+            <label for="paymentStatusSelect">Payment Status:</label>
+            <div class="slds-select_container">
+                <select class="slds-select" name="paymentStatusSelect" value={paymentStatus} onchange={handlePaymentStatusChange}>
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                </select>
+            </div>
+        </div>
+
+      
+
+        <!-- PREVIOUS ORDERS -->
+        <template if:true={previousOrders.length}>
+            <div class="previous-orders">
+                <h3>Previous Orders</h3>
+                <template for:each={previousOrders} for:item="o">
+                    <div key={o.id} class="previous-order-row">
+                        <span>Order #{o.id}</span>
+                        <span>Total: ₹{o.totalAmount}</span>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+    </div>
+
+
+    
+<template if:true={showOtpModal}>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container slds-modal_small">
+            <!-- Header -->
+            
+  <header class="slds-modal__header slds-modal__header_empty">
+                <h2 class="slds-text-heading_medium slds-text-align_center">OTP Verification</h2>
+                <p class="slds-text-body_regular slds-text-align_center slds-m-top_small">
+                    Enter the 6-digit OTP sent to your phone/email
+                </p>
+            </header>
+
+            <!-- Content -->
+            <div class="slds-modal__content slds-p-around_medium">
+                <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-p-top_small">
+                    <template for:each={otpArray} for:item="digit">
+                        <div key={digit.id} class="slds-p-horizontal_small">
+                            <input 
+                                type="text"
+                                maxlength="1"
+                                class="otp-input slds-input slds-text-align_center"
+                                data-id={digit.id}
+                                value={digit.value}
+                                oninput={handleOtpDigitChange}
+                            />
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="slds-modal__footer slds-grid slds-grid_align-end slds-p-around_medium">
+                <lightning-button 
+                    label="Cancel" 
+                    variant="neutral" 
+                    onclick={closeOtpModal}
+                    class="slds-m-right_small">
+                </lightning-button>
+
+                <lightning-button 
+                    label="Verify & Create Order" 
+                    variant="brand" 
+                    onclick={verifyAndCreateOrder}>
+                </lightning-button>
+            </footer>
+             </div>
+          
+        </div>
+    </section>
+
+    <!-- Backdrop -->
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+
+</template>
+

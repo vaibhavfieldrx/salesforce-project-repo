@@ -2,95 +2,94 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-21-2026
+  @last modified on  : 01-23-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-    <div class="card">
 
-        <h2>Billing & Shipping</h2>
+        <!-- TWO COLUMN LAYOUT -->
+        <div class="address-grid">
 
-        <!-- BILLING -->
-        <div class="section">
-            <h3>Billing Address</h3>
+            <!-- BILLING CARD -->
+            <div class="address-card">
+                <h3 class="section-title">Billing Address</h3>
 
-            <!-- Billing Country -->
-            <lightning-combobox
-                label="Country"
-                data-type="billing"
-                data-field="country"
-                value={billing.country}
-                options={countryOptions}
-                onchange={handleAddressChange}>
-            </lightning-combobox>
+                <lightning-combobox
+                    label="Country"
+                    data-type="billing"
+                    data-field="country"
+                    value={billing.country}
+                    options={countryOptions}
+                    onchange={handleAddressChange}>
+                </lightning-combobox>
 
-            <lightning-input label="Street"
-                data-type="billing"
-                data-field="street"
-                onchange={handleAddressChange}>
-            </lightning-input>
+                <lightning-input label="Street"
+                    data-type="billing"
+                    data-field="street"
+                    onchange={handleAddressChange}>
+                </lightning-input>
 
-            <lightning-input label="City"
-                data-type="billing"
-                data-field="city"
-                onchange={handleAddressChange}>
-            </lightning-input>
+                <lightning-input label="City"
+                    data-type="billing"
+                    data-field="city"
+                    onchange={handleAddressChange}>
+                </lightning-input>
 
-            <lightning-input label="State"
-                data-type="billing"
-                data-field="state"
-                onchange={handleAddressChange}>
-            </lightning-input>
+                <lightning-input label="State"
+                    data-type="billing"
+                    data-field="state"
+                    onchange={handleAddressChange}>
+                </lightning-input>
 
-            <lightning-input label="Postal Code"
-                data-type="billing"
-                data-field="postalCode"
-                onchange={handleAddressChange}>
-            </lightning-input>
+                <lightning-input label="Postal Code"
+                    data-type="billing"
+                    data-field="postalCode"
+                    onchange={handleAddressChange}>
+                </lightning-input>
+            </div>
+
+            <!-- SHIPPING CARD -->
+            <div class="address-card">
+                <h3 class="section-title">Shipping Address</h3>
+
+                <lightning-combobox
+                    label="Country"
+                    data-type="shipping"
+                    data-field="country"
+                    value={shipping.country}
+                    options={countryOptions}
+                    onchange={handleAddressChange}>
+                </lightning-combobox>
+
+                <lightning-input label="Street"
+                    data-type="shipping"
+                    data-field="street"
+                    onchange={handleAddressChange}>
+                </lightning-input>
+
+                <lightning-input label="City"
+                    data-type="shipping"
+                    data-field="city"
+                    onchange={handleAddressChange}>
+                </lightning-input>
+
+                <lightning-input label="State"
+                    data-type="shipping"
+                    data-field="state"
+                    onchange={handleAddressChange}>
+                </lightning-input>
+
+                <lightning-input label="Postal Code"
+                    data-type="shipping"
+                    data-field="postalCode"
+                    onchange={handleAddressChange}>
+                </lightning-input>
+            </div>
+
         </div>
 
-        <!-- SHIPPING -->
-        <div class="section">
-            <h3>Shipping Address</h3>
-
-            <!-- Shipping Country -->
-            <lightning-combobox
-                label="Country"
-                data-type="shipping"
-                data-field="country"
-                value={shipping.country}
-                options={countryOptions}
-                onchange={handleAddressChange}>
-            </lightning-combobox>
-
-            <lightning-input label="Street"
-                data-type="shipping"
-                data-field="street"
-                onchange={handleAddressChange}>
-            </lightning-input>
-
-            <lightning-input label="City"
-                data-type="shipping"
-                data-field="city"
-                onchange={handleAddressChange}>
-            </lightning-input>
-
-            <lightning-input label="State"
-                data-type="shipping"
-                data-field="state"
-                onchange={handleAddressChange}>
-            </lightning-input>
-
-            <lightning-input label="Postal Code"
-                data-type="shipping"
-                data-field="postalCode"
-                onchange={handleAddressChange}>
-            </lightning-input>
-        </div>
-
-        <!-- WAREHOUSE -->
-        <div class="section">
-            <h3>Warehouse</h3>
+        <!-- WAREHOUSE (FULL WIDTH) -->
+        <div class="warehouse">
 
             <lightning-combobox
                 label="Select Warehouse"
@@ -100,5 +99,4 @@
             </lightning-combobox>
         </div>
 
-    </div>
 </template>

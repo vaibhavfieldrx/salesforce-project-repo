@@ -2,15 +2,24 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-21-2026
+  @last modified on  : 01-23-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
     <div class="page">
 
-        <h1 class="title">Create New Order</h1>
+         <div class="header">
+            <div>
+                <h1 class="title">Order Management</h1>
+                <p class="desc">Create and manage customer orders</p>
+            </div>
+              <button class="primary" onclick={openNewOrderModal}>
+    View Order
+</button>
+        </div>
+<div class="card">
 
-        <c-customer-selector oncustomerselect={handleCustomer}></c-customer-selector>
+<c-customer-selector oncustomerselect={handleCustomer}></c-customer-selector>
 
         <template if:true={customerId}>
             <c-customer-info customer-id={customerId}></c-customer-info>
@@ -20,20 +29,29 @@
     onproductsselected={handleProductsSelected}>
 </c-product-selector>
 
-            <c-order-summary
-                total={total}
-                discount={discount}
-                payment-status={paymentStatus}>
-            </c-order-summary>
 
-            <lightning-button
-                variant="brand"
-                label="Create Order"
-                onclick={createOrder}>
-            </lightning-button>
+ <lightning-input 
+            type="checkbox" 
+            label="OTP Verification Required" 
+            checked={otpRequired} 
+            onchange={handleOtpRequiredChange}>
+        </lightning-input>
 
-            <c-previous-orders customer-id={customerId}></c-previous-orders>
+        <!-- Create Order Button -->
+      <div class="create-order-wrapper">
+    <lightning-button 
+        label="Create Order" 
+        variant="brand" 
+        class="full-width-btn"
+        onclick={handleCreateOrder}>
+    </lightning-button>
+</div>
+
+
+
         </template>
+</div>
+        
 
     </div>
 </template>

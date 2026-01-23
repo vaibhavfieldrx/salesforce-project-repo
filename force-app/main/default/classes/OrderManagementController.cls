@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 01-22-2026
+ * @last modified on  : 01-23-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class OrderManagementController {
@@ -106,9 +106,9 @@ public static List<Account> getCustomers() {
 @AuraEnabled(cacheable=true)
 public static Account getCustomerDetails(Id customerId) {
     return [
-        SELECT Name, Phone, Email__c
+        SELECT Name, BillingAddress, Email__c
         FROM Account
-        WHERE Id = :customerId
+        WHERE Id = :customerId  
         LIMIT 1
     ];
 }   

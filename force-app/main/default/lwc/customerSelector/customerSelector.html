@@ -2,21 +2,16 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-21-2026
+  @last modified on  : 01-23-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-    <div class="card">
-        <h2 class="card-title">Customer Information</h2>
+    
+        <h2 class="card-title">Select Customer</h2>
 
-        <div class="field">
-            <label class="label">Select Customer</label>
-
-            <lightning-combobox
-                placeholder="Choose a customer..."
-                options={options}
-                onchange={handleChange}>
-            </lightning-combobox>
-        </div>
-    </div>
+        <lightning-combobox
+            placeholder="Choose a customer..."
+            options={options}
+            onchange={handleChange}>
+        </lightning-combobox>
 </template>

@@ -1,16 +1,59 @@
 .page {
-    padding: 20px;
+
+    max-width: 1300px;   
+    margin: 0 auto;     
+    padding: 0 24px;     
 }
 
 .header {
-    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.title{
+    font-size: 24px;
+    font-weight: bold;
+
 }
 
-.title {
-    font-size: 26px;
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(128, 6, 6, 0.08);
+}
+
+.create-order-wrapper {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.full-width-btn {
+    width: 100%;           /* Full width */
+    border-radius: 8px;    /* Rounded corners */
+    font-size: 16px;       /* Slightly bigger font */
+    height: 44px;          /* Taller button */
+    text-align: center;
+}
+.card-title {
+    font-size: 16px;
     font-weight: 600;
+    margin-bottom: 12px;
+}
+.desc{
+    color: #a3a1a1;
 }
 
-.desc {
-    color: #6b7280;
+.primary {
+    background: #45A6A2;
+    color: white;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+}
+
+:host *:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }

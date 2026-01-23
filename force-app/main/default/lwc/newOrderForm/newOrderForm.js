@@ -82,13 +82,28 @@ export default class NewOrderForm extends LightningElement {
     }
 
     // Create order (dummy)
-    createOrder() {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Success',
-                message: 'Order created successfully',
-                variant: 'success'
-            })
-        );
+     @track otpRequired = false;
+
+    handleOtpRequiredChange(event) {
+        this.otpRequired = event.target.checked;
+    }
+
+    handleCreateOrder() {
+        // Get child component
+        const childComp = this.template.querySelector('c-product-selector');
+
+        if (this.otpRequired) {
+            // Ask child to show OTP modal
+            childComp.openOtpModal();
+        } else {
+            // Directly create order
+            childComp.createOrder();
+        }
+    }
+
+    // Optional: handle OTP verified event from child
+    handleOtpVerify(event) {
+        console.log('OTP Verified in parent', event.detail);
+        // Call order creation API if needed
     }
 }
