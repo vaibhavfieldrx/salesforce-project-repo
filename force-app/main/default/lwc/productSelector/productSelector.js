@@ -77,6 +77,7 @@ export default class ProductSelector extends LightningElement {
 
         this.refreshSelection();
         this.calculateTotal();
+         this.notifyParent();
     }
 
     // ===== QTY CHANGE =====
@@ -96,6 +97,7 @@ export default class ProductSelector extends LightningElement {
         );
 
         this.calculateTotal();
+         this.notifyParent();
     }
 
     // ===== DISCOUNT CHANGE =====
@@ -110,11 +112,13 @@ export default class ProductSelector extends LightningElement {
         );
 
         this.calculateTotal();
+         this.notifyParent();
     }
 
     // ===== PAYMENT STATUS =====
     handlePaymentStatusChange(event) {
         this.paymentStatus = event.target.value;
+         this.notifyParent();
     }
 
     // ===== OTP =====
@@ -143,18 +147,7 @@ handleOtpDigitChange(event) {
     this.otp = this.otpArray.map(d => d.value).join('');
 }
 
-verifyAndCreateOrder() {
-    if (this.otp.length === 6) {
-        this.showOtpModal = false;
-        this.createOrder();
 
-        // Notify parent
-        const event = new CustomEvent('verifyotp', { detail: this.otp });
-        this.dispatchEvent(event);
-    } else {
-        alert('Enter complete 6-digit OTP.');
-    }
-}
 
 
 closeOtpModal() {
@@ -189,6 +182,27 @@ closeOtpModal() {
         );
         this.calculateTotal();
     }
+
+    notifyParent() {
+    const payload = {
+        products: this.selectedProducts.map(p => ({
+            productId: p.id,
+            name: p.name,
+            quantity: p.qty,
+            unitPrice: p.price,
+            discount: p.discount || 0,
+            lineTotal: p.displaySubtotal
+        })),
+        totalAmount: this.totalAmount,
+        paymentStatus: this.paymentStatus
+    };
+
+    this.dispatchEvent(
+        new CustomEvent('productsselected', {
+            detail: payload
+        })
+    );
+}
 
     // ===== LOAD PREVIOUS ORDERS =====
     loadPreviousOrders(customerId) {

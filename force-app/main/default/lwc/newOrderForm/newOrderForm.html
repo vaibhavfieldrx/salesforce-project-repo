@@ -23,10 +23,11 @@
 
         <template if:true={customerId}>
             <c-customer-info customer-id={customerId}></c-customer-info>
-          <c-order-address-and-warehouse></c-order-address-and-warehouse>
+          <c-order-address-and-warehouse onaddresschange={handleAddressChange}></c-order-address-and-warehouse>
 
           <c-product-selector
-    onproductsselected={handleProductsSelected}>
+    onproductsselected={handleProductsSelected}
+      onotpverified={handleOtpVerify}>>
 </c-product-selector>
 
 

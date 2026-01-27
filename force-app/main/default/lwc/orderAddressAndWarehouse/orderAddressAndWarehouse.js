@@ -48,6 +48,18 @@ export default class OrderAddressAndWarehouse extends LightningElement {
         this[type][field] = value;
     }
 
+    notifyParent() {
+        this.dispatchEvent(
+            new CustomEvent('addresschange', {
+                detail: {
+                    billingAddress: this.billing,
+                    shippingAddress: this.shipping,
+                    warehouseId: this.selectedWarehouseId
+                }
+            })
+        );
+    }
+
     // expose to parent (Order Page)
     get orderPayload() {
         return {

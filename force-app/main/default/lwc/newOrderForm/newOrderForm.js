@@ -14,6 +14,7 @@ export default class NewOrderForm extends LightningElement {
 
     // Handle customer selection
     handleCustomer(e) {
+        console.log("www", e.detail)
         this.customerId = e.detail;
     }
 
@@ -22,6 +23,17 @@ export default class NewOrderForm extends LightningElement {
         const selected = event.detail;
         const productIds = selected.map(p => p.Id);
 
+           const { products, totalAmount, paymentStatus, addresschange, customerselect  } = event.detail;
+
+    this.orderProducts = products;
+    this.orderTotal = totalAmount;
+    this.paymentStatus = paymentStatus;
+    this.orderAddressData = addresschange;
+    this.selectedCustomer = customerselect;
+
+    console.log('Products:', JSON.stringify(this.orderProducts));
+    console.log('Total:', this.orderTotal);
+    
         try {
             // Call Apex to get actual Pricebook prices
             const priceData = await getProducts({ productIds });
@@ -81,6 +93,20 @@ export default class NewOrderForm extends LightningElement {
         );
     }
 
+     handleAddressChange(event) {
+        const type = event.target.dataset.type;   // billing / shipping
+        const field = event.target.dataset.field;
+        const value = event.target.value;
+
+        this[type] = {
+            ...this[type],
+            [field]: value
+        };
+
+        this.notifyParent();
+    }
+
+
     // Create order (dummy)
      @track otpRequired = false;
 
@@ -88,17 +114,19 @@ export default class NewOrderForm extends LightningElement {
         this.otpRequired = event.target.checked;
     }
 
-    handleCreateOrder() {
-        // Get child component
-        const childComp = this.template.querySelector('c-product-selector');
+    handleOtpVerify(event) {
+    console.log('OTP Verified:', event.detail.otp);
+    this.createOrder(); // ✅ NOW create order
+}
 
-        if (this.otpRequired) {
-            // Ask child to show OTP modal
-            childComp.openOtpModal();
-        } else {
-            // Directly create order
-            childComp.createOrder();
-        }
+    handleCreateOrder() {
+        const productComp = this.template.querySelector('c-product-selector');
+
+        // if (this.otpRequired) {
+        //     productComp.openOtpModal(); // show modal
+        // } else {
+            this.createOrder();
+        // }
     }
 
     // Optional: handle OTP verified event from child
@@ -106,4 +134,57 @@ export default class NewOrderForm extends LightningElement {
         console.log('OTP Verified in parent', event.detail);
         // Call order creation API if needed
     }
+
+    createOrder(){
+//   if (!this.selectedCustomer?.accountId) {
+//         alert('Select customer first');
+//         return;
+//     }
+
+//     if (!this.orderProducts?.length) {
+//         alert('Select at least one product');
+//         return;
+//     }
+
+console.log("thhh", this.selectedCustomer, this.orderAddressData)
+    const finalOrderPayload = {
+        accountId: this.selectedCustomer.accountId,
+        billToContactId: this.selectedCustomer.contactId,
+
+        billingAddress: this.orderAddressData.billingAddress,
+        shippingAddress: this.orderAddressData.shippingAddress,
+
+        warehouseId: this.orderAddressData.warehouseId,
+
+        paymentStatus: this.paymentStatus,
+        totalAmount: this.orderTotal,
+
+        products: this.orderProducts
+    };
+
+    console.log('FINAL PAYLOAD → ', JSON.stringify(finalOrderPayload));
+
+    createOrderWithItems({ orderData: finalOrderPayload })
+        .then(orderId => {
+            console.log('Order Created:', orderId);
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+    }
+
+    verifyAndCreateOrder() {
+    if (this.otp.length === 6) {
+        this.showOtpModal = false;
+        this.createOrder();
+
+        // Notify parent
+        const event = new CustomEvent('verifyotp', { detail: this.otp });
+        this.dispatchEvent(event);
+    } else {
+        alert('Enter complete 6-digit OTP.');
+    }
+}
+
 }

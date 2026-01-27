@@ -1,16 +1,19 @@
-import { LightningElement, wire } from 'lwc';
-import getCustomers from '@salesforce/apex/OrderManagementController.getCustomers';
+import { LightningElement, wire, track } from 'lwc';
+import getCustomers from '@salesforce/apex/CustomerController.getCustomers';
 
 export default class CustomerSelector extends LightningElement {
 
-    options = [];
+    @track options = [];
+    customers = []; // ✅ store full customer records
 
     @wire(getCustomers)
     wiredCustomers({ data, error }) {
         if (data) {
+            this.customers = data; // ✅ save raw data
+            console.log("dataa" , data)
             this.options = data.map(c => ({
-                label: c.Name,
-                value: c.Id
+                label: c.accountName,
+                value: c.accountId
             }));
         } else if (error) {
             console.error(error);
@@ -18,9 +21,24 @@ export default class CustomerSelector extends LightningElement {
     }
 
     handleChange(event) {
+        const selectedId = event.detail.value;
+
+        const selectedCustomer = this.customers.find(
+            c => c.accountId === selectedId
+        );
+
+        if (!selectedCustomer) return;
+
+        console.log('selectedCustomer', selectedCustomer);
+
         this.dispatchEvent(
             new CustomEvent('customerselect', {
-                detail: event.detail.value
+                detail: {
+                    accountId: selectedCustomer.accountId,
+                    name: selectedCustomer.accountName,
+                    phone: selectedCustomer.Phone,
+                    billingContactId: selectedCustomer.contactId // if available
+                }
             })
         );
     }

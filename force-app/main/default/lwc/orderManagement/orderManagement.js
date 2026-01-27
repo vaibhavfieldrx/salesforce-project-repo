@@ -1,4 +1,4 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire, track } from 'lwc';
 import getDashboardData from '@salesforce/apex/OrderManagementController.getDashboardData';
 import { NavigationMixin } from 'lightning/navigation';
 
@@ -18,6 +18,11 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
     // ---------- SEARCH & FILTER ----------
     searchKey = '';
     selectedStatus = ''; // All
+
+
+    @track orderProducts = [];
+@track orderTotal = 0;
+@track paymentStatus = 'Pending';
 
     // ---------- APEX ----------
     openNewOrderModal() {
