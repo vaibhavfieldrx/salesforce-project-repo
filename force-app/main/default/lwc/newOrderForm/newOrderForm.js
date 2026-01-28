@@ -2,6 +2,8 @@ import { LightningElement, track } from 'lwc';
 import ProductModal from 'c/productSelectorModal';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getProducts from '@salesforce/apex/ProductController.getProducts';
+import createOrderWithItems from '@salesforce/apex/OrderController.createOrderWithItems';
+
 
 export default class NewOrderForm extends LightningElement {
 
@@ -13,38 +15,42 @@ export default class NewOrderForm extends LightningElement {
     selectedProducts = [];         // Selected from modal
 
     // Handle customer selection
-    handleCustomer(e) {
-        console.log("www", e.detail)
-        this.customerId = e.detail;
-    }
+handleCustomer(event) {
+    this.selectedCustomer = event.detail; // ✅ object
+    this.customerId = event.detail.accountId; // ✅ ONLY Id
+}
 
     // Handle products selected from ProductModal
+
     async handleProductsSelected(event) {
-        const selected = event.detail;
-        const productIds = selected.map(p => p.Id);
 
-           const { products, totalAmount, paymentStatus, addresschange, customerselect  } = event.detail;
+           const { products, totalAmount, paymentStatus  } = event.detail;
+        console.log("event.detail", products)
 
+           if (!Array.isArray(products)) {
+        console.error('❌ products is not an array', products);
+        return;
+    }
+    
     this.orderProducts = products;
     this.orderTotal = totalAmount;
     this.paymentStatus = paymentStatus;
-    this.orderAddressData = addresschange;
-    this.selectedCustomer = customerselect;
 
     console.log('Products:', JSON.stringify(this.orderProducts));
     console.log('Total:', this.orderTotal);
     
         try {
+              const productIds = products.map(p => p.productId);
             // Call Apex to get actual Pricebook prices
             const priceData = await getProducts({ productIds });
 
-            this.selectedProducts = selected.map(p => {
+            this.selectedProducts = products.map(p => {
                 const priceObj = priceData.find(r => r.id === p.Id);
                 return {
-                    id: p.Id,
+                    id: p.productId,
                     name: p.Name,
-                    price: priceObj ? priceObj.price : 0,
-                    qty: 1
+                    price: priceObj ? priceObj.price : p.unitPrice,
+                    qty: p.quantity
                 };
             });
 
@@ -94,46 +100,58 @@ export default class NewOrderForm extends LightningElement {
     }
 
      handleAddressChange(event) {
-        const type = event.target.dataset.type;   // billing / shipping
-        const field = event.target.dataset.field;
-        const value = event.target.value;
+        // const type = event.target.dataset.type;   // billing / shipping
+        // const field = event.target.dataset.field;
+        // const value = event.target.value;
 
-        this[type] = {
-            ...this[type],
-            [field]: value
-        };
+        // this[type] = {
+        //     ...this[type],
+        //     [field]: value
+        // };
 
-        this.notifyParent();
+        const { billingAddress, shippingAddress, warehouseId } = event.detail;
+    this.orderAddressData = {
+        billingAddress,
+        shippingAddress,
+        warehouseId
+    };
+
     }
 
 
     // Create order (dummy)
      @track otpRequired = false;
+     @track showOtpModal = false;
 
     handleOtpRequiredChange(event) {
         this.otpRequired = event.target.checked;
     }
 
-    handleOtpVerify(event) {
-    console.log('OTP Verified:', event.detail.otp);
-    this.createOrder(); // ✅ NOW create order
-}
+
 
     handleCreateOrder() {
-        const productComp = this.template.querySelector('c-product-selector');
-
-        // if (this.otpRequired) {
-        //     productComp.openOtpModal(); // show modal
-        // } else {
+        if (this.otpRequired) {
+           this.showOtpModal = true; // show modal
+        } else {
             this.createOrder();
-        // }
+        }
     }
 
-    // Optional: handle OTP verified event from child
-    handleOtpVerify(event) {
-        console.log('OTP Verified in parent', event.detail);
-        // Call order creation API if needed
-    }
+    handleVerifyOtp(event) {
+    const otp = event.detail.otp;
+
+    console.log('OTP received from child:', otp);
+
+    // Close modal
+    this.showOtpModal = false;
+
+    // ✅ Parent owns order creation
+    this.createOrder();
+}
+
+handleCloseOtp() {
+    this.showOtpModal = false;
+}
 
     createOrder(){
 //   if (!this.selectedCustomer?.accountId) {
@@ -146,7 +164,6 @@ export default class NewOrderForm extends LightningElement {
 //         return;
 //     }
 
-console.log("thhh", this.selectedCustomer, this.orderAddressData)
     const finalOrderPayload = {
         accountId: this.selectedCustomer.accountId,
         billToContactId: this.selectedCustomer.contactId,
@@ -162,29 +179,17 @@ console.log("thhh", this.selectedCustomer, this.orderAddressData)
         products: this.orderProducts
     };
 
-    console.log('FINAL PAYLOAD → ', JSON.stringify(finalOrderPayload));
 
-    createOrderWithItems({ orderData: finalOrderPayload })
-        .then(orderId => {
-            console.log('Order Created:', orderId);
-        })
-        .catch(error => {
-            console.error(error);
-        });
+    createOrderWithItems({ orderJson: JSON.stringify(finalOrderPayload) })
+    .then(orderId => {
+        console.log('✅ Order Created:', orderId);
+    })
+    .catch(error => {
+        console.error('❌ Order Error:', error.body?.message);
+    });
 
     }
 
-    verifyAndCreateOrder() {
-    if (this.otp.length === 6) {
-        this.showOtpModal = false;
-        this.createOrder();
-
-        // Notify parent
-        const event = new CustomEvent('verifyotp', { detail: this.otp });
-        this.dispatchEvent(event);
-    } else {
-        alert('Enter complete 6-digit OTP.');
-    }
-}
+  
 
 }

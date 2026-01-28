@@ -12,25 +12,19 @@ export default class ProductSelector extends LightningElement {
     pageSize = 15;
     currentPage = 1;
     totalAmount = 0;
-@track otpRequired = false;
-@track showOtpModal = false;
-@track otpArray = [
-    { id: 'otp-0', value: '' },
-    { id: 'otp-1', value: '' },
-    { id: 'otp-2', value: '' },
-    { id: 'otp-3', value: '' },
-    { id: 'otp-4', value: '' },
-    { id: 'otp-5', value: '' }
-];
+    @track otpRequired = false;
+    @track otpArray = [
+        { id: 'otp-0', value: '' },
+        { id: 'otp-1', value: '' },
+        { id: 'otp-2', value: '' },
+        { id: 'otp-3', value: '' },
+        { id: 'otp-4', value: '' },
+        { id: 'otp-5', value: '' }
+    ];
 
-@track otp = '';
+    @track otp = '';
+    @api showOtpModal = false;
 
-   @track showOtpModal = false;
-
-    @api
-    openOtpModal() {
-        this.showOtpModal = true;
-    }
 
 
     // ===== APEX =====
@@ -77,7 +71,7 @@ export default class ProductSelector extends LightningElement {
 
         this.refreshSelection();
         this.calculateTotal();
-         this.notifyParent();
+        this.notifyParent();
     }
 
     // ===== QTY CHANGE =====
@@ -87,9 +81,9 @@ export default class ProductSelector extends LightningElement {
 
         this.selectedProducts = this.selectedProducts.map(p =>
             p.id === id
-                ? { 
-                    ...p, 
-                    qty, 
+                ? {
+                    ...p,
+                    qty,
                     subtotal: p.price * qty,
                     displaySubtotal: p.price * qty - (p.discount || 0)
                 }
@@ -97,7 +91,7 @@ export default class ProductSelector extends LightningElement {
         );
 
         this.calculateTotal();
-         this.notifyParent();
+        this.notifyParent();
     }
 
     // ===== DISCOUNT CHANGE =====
@@ -112,13 +106,13 @@ export default class ProductSelector extends LightningElement {
         );
 
         this.calculateTotal();
-         this.notifyParent();
+        this.notifyParent();
     }
 
     // ===== PAYMENT STATUS =====
     handlePaymentStatusChange(event) {
         this.paymentStatus = event.target.value;
-         this.notifyParent();
+        this.notifyParent();
     }
 
     // ===== OTP =====
@@ -134,24 +128,24 @@ export default class ProductSelector extends LightningElement {
         }
     }
 
-handleOtpDigitChange(event) {
-    const id = event.target.dataset.id;
-    const value = event.target.value.replace(/\D/, '');
-    this.otpArray = this.otpArray.map(d => d.id === id ? { ...d, value } : d);
+    handleOtpDigitChange(event) {
+        const id = event.target.dataset.id;
+        const value = event.target.value.replace(/\D/, '');
+        this.otpArray = this.otpArray.map(d => d.id === id ? { ...d, value } : d);
 
-    const index = this.otpArray.findIndex(d => d.id === id);
-    if (value && index < this.otpArray.length - 1) {
-        this.template.querySelectorAll('.otp-input')[index + 1].focus();
+        const index = this.otpArray.findIndex(d => d.id === id);
+        if (value && index < this.otpArray.length - 1) {
+            this.template.querySelectorAll('.otp-input')[index + 1].focus();
+        }
+
+        this.otp = this.otpArray.map(d => d.value).join('');
     }
-
-    this.otp = this.otpArray.map(d => d.value).join('');
-}
 
 
 
 
 closeOtpModal() {
-    this.showOtpModal = false;
+    this.dispatchEvent(new CustomEvent('closeotp'));
 }
 
     // ===== TOTAL =====
@@ -184,25 +178,47 @@ closeOtpModal() {
     }
 
     notifyParent() {
-    const payload = {
-        products: this.selectedProducts.map(p => ({
-            productId: p.id,
-            name: p.name,
-            quantity: p.qty,
-            unitPrice: p.price,
-            discount: p.discount || 0,
-            lineTotal: p.displaySubtotal
-        })),
-        totalAmount: this.totalAmount,
-        paymentStatus: this.paymentStatus
-    };
+        console.log("this.selectedProducts", this.selectedProducts)
+        const payload = {
+            products: this.selectedProducts.map(p =>
+                (
+                    {
+                        productId: p.id,
+                        name: p.name,
+                        quantity: p.qty,
+                        unitPrice: p.price,
+                        discount: p.discount || 0,
+                        lineTotal: p.displaySubtotal
+                    })),
+            totalAmount: this.totalAmount,
+            paymentStatus: this.paymentStatus
+        };
 
+        this.dispatchEvent(
+            new CustomEvent('productsselected', {
+                detail: payload
+            })
+        );
+    }
+
+
+    verifyAndCreateOrder() {
+    const otp = this.otpArray.map(d => d.value).join('');
+
+    if (otp.length !== 6) {
+        alert('Please enter valid 6-digit OTP');
+        return;
+    }
+
+    // ❌ DO NOT create order here
+    // ✅ JUST notify parent
     this.dispatchEvent(
-        new CustomEvent('productsselected', {
-            detail: payload
+        new CustomEvent('verifyotp', {
+            detail: { otp }
         })
     );
 }
+
 
     // ===== LOAD PREVIOUS ORDERS =====
     loadPreviousOrders(customerId) {
@@ -212,4 +228,6 @@ closeOtpModal() {
             { id: '002', totalAmount: 480 }
         ];
     }
+
+    
 }

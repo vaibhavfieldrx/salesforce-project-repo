@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-23-2026
+  @last modified on  : 01-28-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -26,9 +26,15 @@
           <c-order-address-and-warehouse onaddresschange={handleAddressChange}></c-order-address-and-warehouse>
 
           <c-product-selector
+           show-otp-modal={showOtpModal}
     onproductsselected={handleProductsSelected}
-      onotpverified={handleOtpVerify}>>
+        onverifyotp={handleVerifyOtp}
+    oncloseotp={handleCloseOtp}
+    >
 </c-product-selector>
+
+
+
 
 
  <lightning-input 

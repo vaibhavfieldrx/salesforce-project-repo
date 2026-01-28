@@ -5,19 +5,19 @@ export default class OrderAddressAndWarehouse extends LightningElement {
 
     // ---------- ADDRESS ----------
      countryOptions = [
-        { label: 'India', value: 'IN' },
-        { label: 'United States', value: 'US' },
-        { label: 'United Kingdom', value: 'UK' },
-        { label: 'Australia', value: 'AU' },
-        { label: 'Canada', value: 'CA' }
+        { label: 'India', value: 'India' },
+        { label: 'United States', value: 'United States' },
+        { label: 'United Kingdom', value: 'United Kingdom' },
+        { label: 'Australia', value: 'Australia' },
+        { label: 'Canada', value: 'Canada' }
     ];
 
     @track billing = {
-        country: 'IN'
+        country: 'India'
     };
 
     @track shipping = {
-        country: 'IN'
+        country: 'India'
     };
 
     // ---------- WAREHOUSE ----------
@@ -37,28 +37,47 @@ export default class OrderAddressAndWarehouse extends LightningElement {
         }
     }
 
-    handleWarehouseChange(event) {
-        this.selectedWarehouseId = event.detail.value;
-    }
- handleAddressChange(event) {
-        const type = event.target.dataset.type;   // billing / shipping
-        const field = event.target.dataset.field;
-        const value = event.detail?.value || event.target.value;
 
-        this[type][field] = value;
-    }
 
-    notifyParent() {
-        this.dispatchEvent(
-            new CustomEvent('addresschange', {
-                detail: {
-                    billingAddress: this.billing,
-                    shippingAddress: this.shipping,
-                    warehouseId: this.selectedWarehouseId
-                }
-            })
-        );
-    }
+handleWarehouseChange(event) {
+    this.selectedWarehouseId = event.detail.value;
+    this.notifyParent();
+}
+
+handleAddressChange(event) {
+    const type = event.target.dataset.type;
+    const field = event.target.dataset.field;
+    const value = event.detail?.value || event.target.value;
+
+    this[type] = {
+        ...this[type],
+        [field]: value
+    };
+
+    this.notifyParent();
+}
+
+notifyParent() {
+    console.log('🚀 notifyParent fired', {
+        billing: this.billing,
+        shipping: this.shipping,
+        warehouseId: this.selectedWarehouseId
+    });
+
+    this.dispatchEvent(
+        new CustomEvent('addresschange', {
+            detail: {
+                billingAddress: { ...this.billing },
+                shippingAddress: { ...this.shipping },
+                warehouseId: this.selectedWarehouseId || null
+            },
+            bubbles: true,
+            composed: true
+        })
+    );
+}
+
+
 
     // expose to parent (Order Page)
     get orderPayload() {
