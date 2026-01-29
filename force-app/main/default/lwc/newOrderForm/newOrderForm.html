@@ -2,18 +2,18 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-28-2026
+  @last modified on  : 01-29-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-    <div class="page">
+    <div class="pages">
 
          <div class="header">
             <div>
                 <h1 class="title">Order Management</h1>
                 <p class="desc">Create and manage customer orders</p>
             </div>
-              <button class="primary" onclick={openNewOrderModal}>
+              <button class="primary" onclick={openOrderModal}>
     View Order
 </button>
         </div>
@@ -57,8 +57,70 @@
 
 
         </template>
+     
 </div>
         
 
+   <div class="order-history" if:true={customerId}>
+             <div class="header">
+            <div>
+                <h1 class="title">Order History</h1>
+                <p class="desc">Customer orders history</p>
+            </div>
+             
+        </div>
+
+    <template if:true={hasOrders}>
+        <div class="order-list">
+            <template for:each={orders} for:item="order">
+                <div key={order.Id} class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <h3>{order.OrderNumber}</h3>
+                            <div class="inner-class">
+                                <span class={order.statusClass}>{order.Status}</span>
+                                <span class="date-inner">
+                                    <lightning-icon icon-name="utility:event" size="xx-small"></lightning-icon>
+                                    <lightning-formatted-date-time
+                                        value={order.CreatedDate}
+                                        day="2-digit"
+                                        month="short"
+                                        year="numeric">
+                                    </lightning-formatted-date-time>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="amount">
+                            ₹ {order.TotalAmount}
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <button class="nav-btn" disabled={isFirstPage} onclick={handlePrev}>‹</button>
+
+            <template for:each={pages} for:item="page">
+                <button key={page.number} class={page.class} data-page={page.number} onclick={goToPage}>
+                    {page.number}
+                </button>
+            </template>
+
+            <button class="nav-btn" disabled={isLastPage} onclick={handleNext}>›</button>
+        </div>
+    </template>
+
+    <template if:false={hasOrders}>
+        <div class="empty">
+            <lightning-icon icon-name="utility:inbox" size="large"></lightning-icon>
+            <h2>No Orders Found</h2>
+            <p>This customer doesn’t have any previous orders yet.</p>
+        </div>
+    </template>
+</div>
+
     </div>
+
 </template>

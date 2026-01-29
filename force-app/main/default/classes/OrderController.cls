@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 01-28-2026
+ * @last modified on  : 01-29-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class OrderController {
@@ -135,5 +135,42 @@ public with sharing class OrderController {
         if (country == null) return null;
         if (country == 'IN') return 'India'; // picklist-safe
         return country;
+    }
+
+
+      @AuraEnabled(cacheable=true)
+    public static Map<String, Object> getOrderHistory(
+        Id accountId,
+        Integer pageSize,
+        Integer pageNumber
+    ) {
+        Map<String, Object> result = new Map<String, Object>();
+
+        if (accountId == null) {
+            result.put('orders', new List<Order>());
+            result.put('totalRecords', 0);
+            return result;
+        }
+
+        Integer offsetSize = (pageNumber - 1) * pageSize;
+
+        List<Order> orders = [
+            SELECT Id, OrderNumber, Status, TotalAmount, CreatedDate
+            FROM Order
+            WHERE AccountId = :accountId
+            ORDER BY CreatedDate DESC
+            LIMIT :pageSize OFFSET :offsetSize
+        ];
+
+        Integer totalRecords = [
+            SELECT COUNT()
+            FROM Order
+            WHERE AccountId = :accountId
+        ];
+
+        result.put('orders', orders);
+        result.put('totalRecords', totalRecords);
+
+        return result;
     }
 }

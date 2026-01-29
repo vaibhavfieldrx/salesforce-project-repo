@@ -1,47 +1,149 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, wire } from 'lwc';
 import ProductModal from 'c/productSelectorModal';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getProducts from '@salesforce/apex/ProductController.getProducts';
 import createOrderWithItems from '@salesforce/apex/OrderController.createOrderWithItems';
-
-
-export default class NewOrderForm extends LightningElement {
+import getOrderHistory from '@salesforce/apex/OrderController.getOrderHistory';
+import { NavigationMixin } from 'lightning/navigation';
+export default class NewOrderForm  extends NavigationMixin(LightningElement) {
 
     customerId;
-    @track products = [];          // Products to display in table
+    @track products = [];
     total = 0;
     discount = 0;
     paymentStatus = 'Pending';
-    selectedProducts = [];         // Selected from modal
+    selectedProducts = [];
+    @track orders = [];
+    @track totalRecords = 0;
+    @track pageNumber = 1;
+    @track pages = []; // for pagination {number, class}
+    pageSize = 5;
+    isLoading = false;
+    @track otpRequired = false;
+    @track showOtpModal = false;
+    orderAddressData = {};
+    orderProducts = [];
+    orderTotal = 0;
+    selectedCustomer;
 
-    // Handle customer selection
-handleCustomer(event) {
-    this.selectedCustomer = event.detail; // ✅ object
-    this.customerId = event.detail.accountId; // ✅ ONLY Id
-}
-
-    // Handle products selected from ProductModal
-
-    async handleProductsSelected(event) {
-
-           const { products, totalAmount, paymentStatus  } = event.detail;
-        console.log("event.detail", products)
-
-           if (!Array.isArray(products)) {
-        console.error('❌ products is not an array', products);
-        return;
+    // Pagination getters
+    get totalPages() {
+        return Math.ceil(this.totalRecords / this.pageSize) || 1;
     }
-    
-    this.orderProducts = products;
-    this.orderTotal = totalAmount;
-    this.paymentStatus = paymentStatus;
 
-    console.log('Products:', JSON.stringify(this.orderProducts));
-    console.log('Total:', this.orderTotal);
-    
+    get isFirstPage() {
+        return this.pageNumber === 1;
+    }
+
+    get isLastPage() {
+        return this.pageNumber === this.totalPages;
+    }
+
+    // Wire order history
+    @wire(getOrderHistory, { 
+        accountId: '$customerId',
+        pageSize: '$pageSize',
+        pageNumber: '$pageNumber'
+    })
+    wiredOrders({ data, error }) {
+        this.isLoading = false;
+        if (data) {
+            this.orders = data.orders.map(order => ({
+                ...order,
+                statusClass: this.computeStatusClass(order.Status)
+            }));
+            this.totalRecords = data.totalRecords;
+            this.updatePages();
+        } else if (error) {
+            console.error(error);
+            this.orders = [];
+            this.totalRecords = 0;
+        }
+    }
+
+    // Compute status class
+    computeStatusClass(status) {
+        switch ((status || '').toLowerCase()) {
+            case 'draft':
+                return 'status-draft';
+            case 'completed':
+                return 'status-completed';
+            case 'cancelled':
+                return 'status-cancelled';
+            case 'pending':
+                return 'status-pending';
+            default:
+                return 'status-default';
+        }
+    }
+
+    // Update pagination pages array
+    updatePages() {
+        this.pages = Array.from({ length: this.totalPages }, (_, i) => {
+            const number = i + 1;
+            return {
+                number,
+                class: number === this.pageNumber ? 'page active' : 'page'
+            };
+        });
+    }
+
+    // Customer selection
+    handleCustomer(event) {
+        this.selectedCustomer = event.detail;
+        this.customerId = event.detail.accountId;
+        if (this.customerId) {
+            this.pageNumber = 1;
+            this.isLoading = true;
+        }
+    }
+
+    // Pagination handlers
+    handleNext() {
+        if (!this.isLastPage) {
+            this.pageNumber += 1;
+            this.isLoading = true;
+        }
+    }
+
+    handlePrev() {
+        if (!this.isFirstPage) {
+            this.pageNumber -= 1;
+            this.isLoading = true;
+        }
+    }
+
+    goToPage(event) {
+        const page = parseInt(event.target.dataset.page, 10);
+        this.pageNumber = page;
+        this.isLoading = true;
+    }
+
+    handlePageSizeChange(event) {
+        this.pageSize = parseInt(event.detail.value, 10);
+        this.pageNumber = 1;
+        this.isLoading = true;
+    }
+
+    get hasOrders() {
+        return this.orders && this.orders.length > 0;
+    }
+
+    // Products selection
+    async handleProductsSelected(event) {
+        const { products, totalAmount, paymentStatus } = event.detail;
+
+        if (!Array.isArray(products)) {
+            console.error('❌ products is not an array', products);
+            return;
+        }
+
+        this.orderProducts = products;
+        this.orderTotal = totalAmount;
+        this.paymentStatus = paymentStatus;
+
         try {
-              const productIds = products.map(p => p.productId);
-            // Call Apex to get actual Pricebook prices
+            const productIds = products.map(p => p.productId);
             const priceData = await getProducts({ productIds });
 
             this.selectedProducts = products.map(p => {
@@ -54,7 +156,6 @@ handleCustomer(event) {
                 };
             });
 
-            // Update products displayed in table
             this.products = [...this.selectedProducts];
             this.calculateTotal();
 
@@ -70,18 +171,13 @@ handleCustomer(event) {
         }
     }
 
-    // Open modal to select products
     async openProductModal() {
-        const selectedProducts = await ProductModal.open({
-            size: 'large'
-        });
-
+        const selectedProducts = await ProductModal.open({ size: 'large' });
         if (selectedProducts && selectedProducts.length) {
             this.handleProductsSelected({ detail: selectedProducts });
         }
     }
 
-    // Handle quantity change in table (optional)
     handleQtyChange(e) {
         const productId = e.target.dataset.id;
         const qty = parseInt(e.target.value, 10) || 1;
@@ -92,104 +188,87 @@ handleCustomer(event) {
         this.calculateTotal();
     }
 
-    // Calculate total amount
+    openOrderModal() {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+             attributes: {
+                url: '/order'
+            }
+        });
+    }
+
     calculateTotal() {
-        this.total = this.products.reduce(
-            (sum, p) => sum + (p.price * p.qty), 0
-        );
+        this.total = this.products.reduce((sum, p) => sum + (p.price * p.qty), 0);
     }
 
-     handleAddressChange(event) {
-        // const type = event.target.dataset.type;   // billing / shipping
-        // const field = event.target.dataset.field;
-        // const value = event.target.value;
-
-        // this[type] = {
-        //     ...this[type],
-        //     [field]: value
-        // };
-
+    handleAddressChange(event) {
         const { billingAddress, shippingAddress, warehouseId } = event.detail;
-    this.orderAddressData = {
-        billingAddress,
-        shippingAddress,
-        warehouseId
-    };
-
+        this.orderAddressData = { billingAddress, shippingAddress, warehouseId };
     }
-
-
-    // Create order (dummy)
-     @track otpRequired = false;
-     @track showOtpModal = false;
 
     handleOtpRequiredChange(event) {
         this.otpRequired = event.target.checked;
     }
 
-
-
     handleCreateOrder() {
         if (this.otpRequired) {
-           this.showOtpModal = true; // show modal
+            this.showOtpModal = true;
         } else {
             this.createOrder();
         }
     }
 
     handleVerifyOtp(event) {
-    const otp = event.detail.otp;
-
-    console.log('OTP received from child:', otp);
-
-    // Close modal
-    this.showOtpModal = false;
-
-    // ✅ Parent owns order creation
-    this.createOrder();
-}
-
-handleCloseOtp() {
-    this.showOtpModal = false;
-}
-
-    createOrder(){
-//   if (!this.selectedCustomer?.accountId) {
-//         alert('Select customer first');
-//         return;
-//     }
-
-//     if (!this.orderProducts?.length) {
-//         alert('Select at least one product');
-//         return;
-//     }
-
-    const finalOrderPayload = {
-        accountId: this.selectedCustomer.accountId,
-        billToContactId: this.selectedCustomer.contactId,
-
-        billingAddress: this.orderAddressData.billingAddress,
-        shippingAddress: this.orderAddressData.shippingAddress,
-
-        warehouseId: this.orderAddressData.warehouseId,
-
-        paymentStatus: this.paymentStatus,
-        totalAmount: this.orderTotal,
-
-        products: this.orderProducts
-    };
-
-
-    createOrderWithItems({ orderJson: JSON.stringify(finalOrderPayload) })
-    .then(orderId => {
-        console.log('✅ Order Created:', orderId);
-    })
-    .catch(error => {
-        console.error('❌ Order Error:', error.body?.message);
-    });
-
+        const otp = event.detail.otp;
+        console.log('OTP received:', otp);
+        this.showOtpModal = false;
+        this.createOrder();
     }
 
-  
+    handleCloseOtp() {
+        this.showOtpModal = false;
+    }
 
+    createOrder() {
+        if (!this.selectedCustomer?.accountId) {
+            this.dispatchEvent(
+                new ShowToastEvent({ title: 'Error', message: 'Select a customer first', variant: 'error' })
+            );
+            return;
+        }
+
+        if (!this.orderProducts?.length) {
+            this.dispatchEvent(
+                new ShowToastEvent({ title: 'Error', message: 'Select at least one product', variant: 'error' })
+            );
+            return;
+        }
+
+        const finalOrderPayload = {
+            accountId: this.selectedCustomer.accountId,
+            billToContactId: this.selectedCustomer.contactId,
+            billingAddress: this.orderAddressData.billingAddress,
+            shippingAddress: this.orderAddressData.shippingAddress,
+            warehouseId: this.orderAddressData.warehouseId,
+            paymentStatus: this.paymentStatus,
+            totalAmount: this.orderTotal,
+            products: this.orderProducts
+        };
+
+        createOrderWithItems({ orderJson: JSON.stringify(finalOrderPayload) })
+            .then(orderId => {
+                console.log('✅ Order Created:', orderId);
+                this.dispatchEvent(
+                    new ShowToastEvent({ title: 'Success', message: 'Order Created Successfully', variant: 'success' })
+                );
+                this.pageNumber = 1;
+                this.isLoading = true; // refresh order history
+            })
+            .catch(error => {
+                console.error('❌ Order Error:', error.body?.message);
+                this.dispatchEvent(
+                    new ShowToastEvent({ title: 'Error', message: error.body?.message || 'Order creation failed', variant: 'error' })
+                );
+            });
+    }
 }
