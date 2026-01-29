@@ -1,0 +1,147 @@
+.page {
+    padding: 24px;
+    background: #f4f6f9;
+}
+
+.back {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    color: #2563eb;
+    cursor: pointer;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.sub {
+    color: #6b7280;
+}
+
+.status {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.delivered {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+.card-header {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.item-price {
+    text-align: right;
+    display: grid;
+}
+.display-g{
+    display: grid;
+}
+.divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 14px 0;
+}
+
+.total,
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.primary {
+    color: #2563eb;
+}
+
+.timeline {
+    list-style: none;
+    padding: 0;
+}
+
+.timeline li {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 6px;
+}
+
+.blue .dot { background: #2563eb; }
+.orange .dot { background: #f59e0b; }
+.green .dot { background: #22c55e; }
+
+.customer {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.badge {
+    background: #dcfce7;
+    color: #166534;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 6px;
+}
+
+.info {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 13px;
+    margin: 6px 0;
+}
+
+.muted {
+    color: #6b7280;
+    font-size: 12px;
+}
+.item-info{
+    display: grid;
+}
