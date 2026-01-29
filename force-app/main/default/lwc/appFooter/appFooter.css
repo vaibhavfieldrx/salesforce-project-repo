@@ -1,0 +1,47 @@
+.footer {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    padding: 14px 24px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    font-size: 13px;
+    color: #475569;
+}
+
+.left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo {
+    --slds-c-icon-color-foreground-default: #2563eb;
+}
+
+.brand {
+    font-weight: 600;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.center {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+}
+
+.center a {
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.center a:hover {
+    color: #2563eb;
+}
+
+.right {
+    white-space: nowrap;
+    color: #64748b;
+}

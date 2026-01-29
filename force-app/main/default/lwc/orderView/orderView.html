@@ -1,0 +1,170 @@
+<template>
+    <div class="page">
+
+        <!-- BACK -->
+        <div class="back">
+            <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+            <span>Back to Orders</span>
+        </div>
+
+        <!-- HEADER -->
+        <div class="header">
+            <div>
+                <h1 class="title">Order #0001</h1>
+                <p class="sub">Order placed on 2024-01-15</p>
+            </div>
+
+            <span class="status delivered">Delivered</span>
+        </div>
+
+        <div class="layout">
+
+            <!-- LEFT -->
+            <div>
+
+                <!-- ORDER ITEMS -->
+                <div class="card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="standard:orders" size="small"></lightning-icon>
+                        <h3>Order Items</h3>
+                    </div>
+<hr>
+                    <div class="item">
+                        <lightning-icon icon-name="standard:product" size="medium"></lightning-icon>
+
+                        <div class="item-info">
+                            <h4>Industrial Widget A</h4>
+                            <span class="muted">SKU: IW-001</span>
+                        </div>
+
+                        <div class="item-price">
+                            <h4>$1249.50</h4>
+                            <span class="muted">50 × $24.99</span>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="total">
+                        <span>Total</span>
+                        <b class="primary">$1249.50</b>
+                    </div>
+                </div>
+
+                <!-- TIMELINE -->
+                <div class="card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="utility:event" size="small"></lightning-icon>
+                        <h3>Order Timeline</h3>
+                    </div>
+
+                    <ul class="timeline">
+                        <li class="blue">
+                            <span class="dot"></span>
+                            <div class="display-g">
+                                <h4>Order Placed</h4>
+                                <span class="muted">2024-01-15</span>
+                            </div>
+                        </li>
+
+                        <li class="orange">
+                            <span class="dot"></span>
+                            <div class="display-g">
+                                <h4>Processing Started</h4>
+                                <span class="muted">Order is being prepared</span>
+                            </div>
+                        </li>
+
+                        <li class="blue">
+                            <span class="dot"></span>
+                            <div class="display-g">
+                                <h4>Shipped</h4>
+                                <span class="muted">Package is on its way</span>
+                            </div>
+                        </li>
+
+                        <li class="green">
+                            <span class="dot"></span>
+                            <div class="display-g">
+                                <h4>Delivered</h4>
+                                <span class="muted">Order completed successfully</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- RIGHT -->
+            <div>
+
+                <!-- CUSTOMER INFO -->
+                <div class="card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="standard:account" size="small"></lightning-icon>
+                        <h3>Customer Information</h3>
+                    </div>
+
+                    <div class="customer">
+                        <lightning-icon icon-name="standard:user" size="medium"></lightning-icon>
+                        <div class="display-g">
+                            <h4>Acme Corp</h4>
+                            <span class="badge">Active</span>
+                        </div>
+                    </div>
+
+                    <p class="info">
+                        <lightning-icon icon-name="utility:email" size="x-small"></lightning-icon>
+                        contact@acme.com
+                    </p>
+                    <p class="info">
+                        <lightning-icon icon-name="utility:call" size="x-small"></lightning-icon>
+                        +1 555-0101
+                    </p>
+                    <p class="info">
+                        <lightning-icon icon-name="utility:location" size="x-small"></lightning-icon>
+                        123 Business Ave, New York
+                    </p>
+                </div>
+
+                <!-- TERRITORY -->
+                <div class="card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="utility:world" size="small"></lightning-icon>
+                        <h3>Territory</h3>
+                    </div>
+
+                    <h4>North Region</h4>
+                    <p class="muted">Manager: John Smith</p>
+                </div>
+
+                <!-- PAYMENT -->
+                <div class="card">
+                    <div class="card-header">
+                        <lightning-icon icon-name="utility:money" size="small"></lightning-icon>
+                        <h3>Payment Summary</h3>
+                    </div>
+
+                    <div class="row">
+                        <span>Subtotal</span><span>$1249.50</span>
+                    </div>
+                    <div class="row">
+                        <span>Shipping</span><span>$0.00</span>
+                    </div>
+                    <div class="row">
+                        <span>Tax</span><span>$0.00</span>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="row total">
+                        <b>Total</b>
+                        <b class="primary">$1249.50</b>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</template>
