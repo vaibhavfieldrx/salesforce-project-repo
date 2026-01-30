@@ -94,6 +94,38 @@ public with sharing class OrderManagementController {
 
 
     @AuraEnabled(cacheable=true)
+public static Map<String, Object> getOrderDetails(Id orderId) {
+
+    Order ord = [
+        SELECT Id, OrderNumber, EffectiveDate, TotalAmount,
+               AccountId,
+               Account.Name,
+               Account.Phone,
+               (SELECT Id, Quantity, UnitPrice, TotalPrice,
+                       Product2.Name, Product2.StockKeepingUnit
+                FROM OrderItems)
+        FROM Order
+        WHERE Id = :orderId
+        LIMIT 1
+    ];
+
+    Contact con;
+    if (ord.AccountId != null) {
+        con = [
+            SELECT Email, Phone
+            FROM Contact
+            WHERE AccountId = :ord.AccountId
+            LIMIT 1
+        ];
+    }
+
+    return new Map<String, Object>{
+        'order' => ord,
+        'contact' => con
+    };
+}
+
+    @AuraEnabled(cacheable=true)
 public static List<Account> getCustomers() {
     return [
         SELECT Id, Name

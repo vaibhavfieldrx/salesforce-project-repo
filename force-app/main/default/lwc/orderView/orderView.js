@@ -1,28 +1,54 @@
 import { LightningElement, wire } from 'lwc';
 import { CurrentPageReference } from 'lightning/navigation';
+import getOrderDetails from '@salesforce/apex/OrderManagementController.getOrderDetails';
 
 export default class OrderView extends LightningElement {
 
     orderId;
 
-    orderNumber = '0001';
-    orderDate = '2024-01-15';
+    // ---------- ORDER DATA ----------
+    orderNumber;
+    orderDate;
+    totalAmount;
 
-    productName = 'Industrial Widget A';
-    sku = 'IW-001';
-    qty = 50;
-    price = 24.99;
-    totalAmount = 1249.50;
+    customerName;
+    email;
+    phone;
 
-    customerName = 'Acme Corp';
-    email = 'contact@acme.com';
-    phone = '+1 555-0101';
+    products = []; // if you want order items later
 
+    // ---------- GET ORDER ID FROM URL ----------
     @wire(CurrentPageReference)
     getStateParameters(pageRef) {
-        if (pageRef) {
+        if (pageRef && pageRef.state?.c__orderId) {
             this.orderId = pageRef.state.c__orderId;
-            // 👉 later yahan Apex call karoge
+        }
+    }
+
+    // ---------- FETCH ORDER DETAILS ----------
+    @wire(getOrderDetails, { orderId: '$orderId' })
+    wiredOrder({ data, error }) {
+        if (data) {
+            this.orderNumber = data.OrderNumber;
+            this.orderDate = data.EffectiveDate;
+            this.totalAmount = data.TotalAmount;
+
+            this.customerName = data.Account?.Name;
+            this.email = data.Account?.PersonEmail;
+            this.phone = data.Account?.Phone;
+
+            // OPTIONAL: Order Items
+            this.products = data.OrderItems?.map(item => ({
+                id: item.Id,
+                name: item.Product2.Name,
+                sku: item.Product2.StockKeepingUnit,
+                qty: item.Quantity,
+                price: item.UnitPrice,
+                total: item.TotalPrice
+            })) || [];
+
+        } else if (error) {
+            console.error('Error loading order', error);
         }
     }
 }
