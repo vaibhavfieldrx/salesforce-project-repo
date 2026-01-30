@@ -2,7 +2,6 @@ import { LightningElement, wire } from 'lwc';
 import getDashboardData from '@salesforce/apex/OrderManagementController.getDashboardData';
 import { NavigationMixin } from 'lightning/navigation';
 
-
 export default class OrderManagement extends NavigationMixin(LightningElement) {
 
     // ---------- STATE ----------
@@ -17,18 +16,47 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
 
     // ---------- SEARCH & FILTER ----------
     searchKey = '';
-    selectedStatus = ''; // All
+    selectedStatus = '';
 
-    // ---------- APEX ----------
+    // ---------- NAVIGATION ----------
     openNewOrderModal() {
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
-             attributes: {
+            attributes: {
                 url: '/createorder'
             }
         });
     }
 
+    // 👉 NEW: Handle dropdown actions
+    handleAction(event) {
+        const action = event.detail.value;
+        const orderId = event.target.dataset.id;
+
+        if (action === 'view') {
+            this.navigateToViewOrder(orderId);
+        }
+
+        if (action === 'edit') {
+            // optional later
+        }
+
+        if (action === 'delete') {
+            // optional later
+        }
+    }
+
+   navigateToViewOrder(orderId) {
+    this[NavigationMixin.Navigate]({
+        type: 'standard__webPage',
+        attributes: {
+            url: `/order-view?c__orderId=${orderId}`
+        }
+    });
+}
+
+
+    // ---------- APEX ----------
     @wire(getDashboardData, {
         pageSize: '$pageSize',
         pageNumber: '$currentPage',
