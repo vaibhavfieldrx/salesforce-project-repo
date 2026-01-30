@@ -5,6 +5,7 @@ import getProducts from '@salesforce/apex/ProductController.getProducts';
 import createOrderWithItems from '@salesforce/apex/OrderController.createOrderWithItems';
 import getOrderHistory from '@salesforce/apex/OrderController.getOrderHistory';
 import { NavigationMixin } from 'lightning/navigation';
+import LightningAlert from 'lightning/alert';
 export default class NewOrderForm  extends NavigationMixin(LightningElement) {
 
     customerId;
@@ -96,6 +97,14 @@ export default class NewOrderForm  extends NavigationMixin(LightningElement) {
             this.pageNumber = 1;
             this.isLoading = true;
         }
+    }
+
+      async showAlert(title, message, theme) {
+        await LightningAlert.open({
+            message: message,
+            theme: theme, // success | error | warning | info
+            label: title
+        });
     }
 
     // Pagination handlers
@@ -229,18 +238,37 @@ export default class NewOrderForm  extends NavigationMixin(LightningElement) {
         this.showOtpModal = false;
     }
 
+
+    async showSuccessAndReload() {
+    await LightningAlert.open({
+        message: 'Order Created Successfully',
+        theme: 'success',
+        label: 'Success'
+    });
+
+    // ✅ User clicked OK
+    window.location.reload();
+}
+
     createOrder() {
         if (!this.selectedCustomer?.accountId) {
-            this.dispatchEvent(
-                new ShowToastEvent({ title: 'Error', message: 'Select a customer first', variant: 'error' })
-            );
+            this.showAlert(
+            'Error',
+            'Select a customer first',
+            'error'
+        );
+            
             return;
         }
 
         if (!this.orderProducts?.length) {
-            this.dispatchEvent(
-                new ShowToastEvent({ title: 'Error', message: 'Select at least one product', variant: 'error' })
-            );
+               this.showAlert(
+            'Error',
+            'Select at least one product',
+            'error'
+        );
+
+           
             return;
         }
 
@@ -255,20 +283,23 @@ export default class NewOrderForm  extends NavigationMixin(LightningElement) {
             products: this.orderProducts
         };
 
+
+        
+
         createOrderWithItems({ orderJson: JSON.stringify(finalOrderPayload) })
             .then(orderId => {
-                console.log('✅ Order Created:', orderId);
-                this.dispatchEvent(
-                    new ShowToastEvent({ title: 'Success', message: 'Order Created Successfully', variant: 'success' })
-                );
-                this.pageNumber = 1;
-                this.isLoading = true; // refresh order history
+               this.showSuccessAndReload();
             })
             .catch(error => {
                 console.error('❌ Order Error:', error.body?.message);
-                this.dispatchEvent(
-                    new ShowToastEvent({ title: 'Error', message: error.body?.message || 'Order creation failed', variant: 'error' })
-                );
+                  this.showAlert(
+            'Error',
+            error?.body?.message || 'Order creation failed',
+            'error'
+        );
+                // this.dispatchEvent(
+                //     new ShowToastEvent({ title: 'Error', message: error.body?.message || 'Order creation failed', variant: 'error' })
+                // );
             });
     }
 }
