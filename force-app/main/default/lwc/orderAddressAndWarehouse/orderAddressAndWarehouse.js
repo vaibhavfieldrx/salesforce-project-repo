@@ -1,10 +1,27 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, track, wire, api } from 'lwc';
 import getWarehouses from '@salesforce/apex/OrderManagementController.getWarehouses';
 
 export default class OrderAddressAndWarehouse extends LightningElement {
 
-    // ---------- ADDRESS ----------
-     countryOptions = [
+    /* ===================== API (FROM PARENT) ===================== */
+    @api
+    set orderData(value) {
+        if (!value) return;
+
+        this.billing = { ...this.billing, ...value.billingAddress };
+        this.shipping = { ...this.shipping, ...value.shippingAddress };
+        this.selectedWarehouseId = value.warehouseId || null;
+    }
+    get orderData() {
+        return {
+            billingAddress: this.billing,
+            shippingAddress: this.shipping,
+            warehouseId: this.selectedWarehouseId
+        };
+    }
+
+    /* ===================== ADDRESS ===================== */
+    countryOptions = [
         { label: 'India', value: 'India' },
         { label: 'United States', value: 'United States' },
         { label: 'United Kingdom', value: 'United Kingdom' },
@@ -12,19 +29,14 @@ export default class OrderAddressAndWarehouse extends LightningElement {
         { label: 'Canada', value: 'Canada' }
     ];
 
-    @track billing = {
-        country: 'India'
-    };
+    @track billing = { country: 'India' };
+    @track shipping = { country: 'India' };
 
-    @track shipping = {
-        country: 'India'
-    };
-
-    // ---------- WAREHOUSE ----------
+    /* ===================== WAREHOUSE ===================== */
     warehouseOptions = [];
     selectedWarehouseId;
 
-    // ---------- APEX ----------
+    /* ===================== APEX ===================== */
     @wire(getWarehouses)
     wiredWarehouses({ data, error }) {
         if (data) {
@@ -37,54 +49,36 @@ export default class OrderAddressAndWarehouse extends LightningElement {
         }
     }
 
+    /* ===================== HANDLERS ===================== */
+    handleWarehouseChange(event) {
+        this.selectedWarehouseId = event.detail.value;
+        this.notifyParent();
+    }
 
+    handleAddressChange(event) {
+        const type = event.target.dataset.type;
+        const field = event.target.dataset.field;
+        const value = event.detail?.value || event.target.value;
 
-handleWarehouseChange(event) {
-    this.selectedWarehouseId = event.detail.value;
-    this.notifyParent();
-}
-
-handleAddressChange(event) {
-    const type = event.target.dataset.type;
-    const field = event.target.dataset.field;
-    const value = event.detail?.value || event.target.value;
-
-    this[type] = {
-        ...this[type],
-        [field]: value
-    };
-
-    this.notifyParent();
-}
-
-notifyParent() {
-    console.log('🚀 notifyParent fired', {
-        billing: this.billing,
-        shipping: this.shipping,
-        warehouseId: this.selectedWarehouseId
-    });
-
-    this.dispatchEvent(
-        new CustomEvent('addresschange', {
-            detail: {
-                billingAddress: { ...this.billing },
-                shippingAddress: { ...this.shipping },
-                warehouseId: this.selectedWarehouseId || null
-            },
-            bubbles: true,
-            composed: true
-        })
-    );
-}
-
-
-
-    // expose to parent (Order Page)
-    get orderPayload() {
-        return {
-            billingAddress: this.billing,
-            shippingAddress: this.shipping,
-            warehouseId: this.selectedWarehouseId
+        this[type] = {
+            ...this[type],
+            [field]: value
         };
+
+        this.notifyParent();
+    }
+
+    notifyParent() {
+        this.dispatchEvent(
+            new CustomEvent('addresschange', {
+                detail: {
+                    billingAddress: { ...this.billing },
+                    shippingAddress: { ...this.shipping },
+                    warehouseId: this.selectedWarehouseId || null
+                },
+                bubbles: true,
+                composed: true
+            })
+        );
     }
 }

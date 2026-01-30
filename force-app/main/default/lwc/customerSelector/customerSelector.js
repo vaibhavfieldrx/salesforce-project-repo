@@ -1,10 +1,13 @@
-import { LightningElement, wire, track } from 'lwc';
+import { LightningElement, wire, track, api } from 'lwc';
 import getCustomers from '@salesforce/apex/CustomerController.getCustomers';
 
 export default class CustomerSelector extends LightningElement {
 
     @track options = [];
     customers = []; // ✅ store full customer records
+
+       @api selectedCustomerId;   // ✅ RECEIVED FROM PARENT
+    @api disabled = false;     // ✅ EDIT MODE SUPPORT
 
     @wire(getCustomers)
     wiredCustomers({ data, error }) {
@@ -22,7 +25,7 @@ export default class CustomerSelector extends LightningElement {
 
     handleChange(event) {
         const selectedId = event.detail.value;
-
+this.selectedCustomerId = selectedId;
         const selectedCustomer = this.customers.find(
             c => c.accountId === selectedId
         );

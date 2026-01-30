@@ -34,24 +34,29 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
     }
 
     // 👉 NEW: Handle dropdown actions
-    handleAction(event) {
-        const action = event.detail.value;
-        const orderId = event.target.dataset.id;
+handleAction(event) {
+    const [action, orderId] = event.detail.value.split(':');
 
-        if (action === 'view') {
-            this.navigateToViewOrder(orderId);
-        }
-
-        if (action === 'edit') {
-            // optional later
-        }
-
-        if (action === 'delete') {
-            // optional later
-        }
+    if (action === 'view') {
+        this.navigateToViewOrder(orderId);
     }
 
-   navigateToViewOrder(orderId) {
+    if (action === 'edit') {
+        this.navigateToEditOrder(orderId);
+    }
+}
+
+navigateToEditOrder(orderId) {
+    this[NavigationMixin.Navigate]({
+        type: 'standard__webPage',
+        attributes: {
+            url: `/createorder?c__mode=edit&c__orderId=${orderId}`
+        }
+    });
+}
+
+
+navigateToViewOrder(orderId) {
     this[NavigationMixin.Navigate]({
         type: 'standard__webPage',
         attributes: {
@@ -59,7 +64,6 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
         }
     });
 }
-
 
     // ---------- APEX ----------
     @wire(getDashboardData, {
@@ -80,7 +84,10 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
                 date: o.EffectiveDate,
                 amount: o.TotalAmount,
                 status: o.Status,
-                statusClass: this.getStatusClass(o.Status)
+                statusClass: this.getStatusClass(o.Status),
+                view: `view:${o.Id}`,
+                edit:  `edit:${o.Id}`,
+                delete: `delete:${o.Id}`
             }));
 
             this.summaryList = Object.keys(data.summary || {}).map(key => ({
@@ -94,11 +101,13 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
         }
     }
 
+  
     // ---------- SEARCH ----------
     handleSearch(event) {
         this.searchKey = event.target.value;
         this.currentPage = 1;
     }
+    
 
     // ---------- STATUS FILTER ----------
     handleStatusChange(event) {

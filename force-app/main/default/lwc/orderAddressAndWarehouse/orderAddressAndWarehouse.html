@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-23-2026
+  @last modified on  : 01-30-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -26,24 +26,29 @@
                 <lightning-input label="Street"
                     data-type="billing"
                     data-field="street"
+                       value={billing.street}
                     onchange={handleAddressChange}>
                 </lightning-input>
 
                 <lightning-input label="City"
                     data-type="billing"
                     data-field="city"
+                      value={billing.city}
                     onchange={handleAddressChange}>
                 </lightning-input>
 
                 <lightning-input label="State"
                     data-type="billing"
                     data-field="state"
+                      value={billing.state}
+
                     onchange={handleAddressChange}>
                 </lightning-input>
 
                 <lightning-input label="Postal Code"
                     data-type="billing"
                     data-field="postalCode"
+                      value={billing.postalCode}
                     onchange={handleAddressChange}>
                 </lightning-input>
             </div>
@@ -64,24 +69,28 @@
                 <lightning-input label="Street"
                     data-type="shipping"
                     data-field="street"
+                    value={shipping.country}
                     onchange={handleAddressChange}>
                 </lightning-input>
 
                 <lightning-input label="City"
                     data-type="shipping"
                     data-field="city"
+                    value={shipping.city}
                     onchange={handleAddressChange}>
                 </lightning-input>
 
                 <lightning-input label="State"
                     data-type="shipping"
                     data-field="state"
+                    value={shipping.state}
                     onchange={handleAddressChange}>
                 </lightning-input>
 
                 <lightning-input label="Postal Code"
                     data-type="shipping"
                     data-field="postalCode"
+                    value={shipping.postalCode}
                     onchange={handleAddressChange}>
                 </lightning-input>
             </div>

@@ -1,6 +1,6 @@
 import { LightningElement, wire, track, api } from 'lwc';
 import getAllProducts from '@salesforce/apex/ProductController.getAllProducts';
-
+import { refreshApex } from '@salesforce/apex';
 export default class ProductSelector extends LightningElement {
     @track products = [];
     @track selectedProducts = [];
@@ -48,8 +48,39 @@ export default class ProductSelector extends LightningElement {
     get totalPages() { return Math.ceil(this.totalRecords / this.pageSize); }
     get isFirstPage() { return this.currentPage === 1; }
     get isLastPage() { return this.currentPage >= this.totalPages; }
-    handleNext() { if (!this.isLastPage) this.currentPage++; }
-    handlePrev() { if (!this.isFirstPage) this.currentPage--; }
+  handlePrev() {
+    if (this.isFirstPage) return;
+    this.pageNumber--;
+    this.refreshOrders();
+}
+
+handleNext() {
+    if (this.isLastPage) return;
+    this.pageNumber++;
+    this.refreshOrders();
+}
+
+async refreshOrders() {
+    if (this.customerId && this.wiredOrdersResult) {
+        try {
+            this.isLoading = true;
+            await refreshApex(this.wiredOrdersResult);
+        } catch (err) {
+            console.error('Error refreshing orders', err);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+}
+
+goToPage(event) {
+    const page = parseInt(event.target.dataset.page, 10);
+    if (page === this.pageNumber) return;
+    this.pageNumber = page;
+    this.refreshOrders();
+}
+
+
 
     // ===== SELECT PRODUCT =====
     handleSelect(event) {
@@ -143,6 +174,27 @@ export default class ProductSelector extends LightningElement {
 
 
 
+    @api
+setEditProducts(orderProducts) {
+    if (!orderProducts || !orderProducts.length) return;
+
+    this.selectedProducts = orderProducts.map(p => ({
+        id: p.productId,
+        name: p.name,
+        price: p.unitPrice,
+        qty: p.quantity,
+        discount: p.discount || 0,
+        subtotal: p.unitPrice * p.quantity,
+        displaySubtotal: (p.unitPrice * p.quantity) - (p.discount || 0),
+        selected: true
+    }));
+
+    this.refreshSelection();
+    this.calculateTotal();
+    this.notifyParent();
+}
+
+
 
 closeOtpModal() {
     this.dispatchEvent(new CustomEvent('closeotp'));
@@ -218,16 +270,6 @@ closeOtpModal() {
         })
     );
 }
-
-
-    // ===== LOAD PREVIOUS ORDERS =====
-    loadPreviousOrders(customerId) {
-        // Example dummy data
-        this.previousOrders = [
-            { id: '001', totalAmount: 250 },
-            { id: '002', totalAmount: 480 }
-        ];
-    }
 
     
 }

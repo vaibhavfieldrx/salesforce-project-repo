@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-29-2026
+  @last modified on  : 01-30-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -19,11 +19,15 @@
         </div>
 <div class="card">
 
-<c-customer-selector oncustomerselect={handleCustomer}></c-customer-selector>
+<c-customer-selector
+    selected-customer-id={customerId}
+   disabled={isEditMode}
+    oncustomerselect={handleCustomer}>
+</c-customer-selector>
 
         <template if:true={customerId}>
             <c-customer-info customer-id={customerId}></c-customer-info>
-          <c-order-address-and-warehouse onaddresschange={handleAddressChange}></c-order-address-and-warehouse>
+          <c-order-address-and-warehouse order-data={orderAddressData} onaddresschange={handleAddressChange}></c-order-address-and-warehouse>
 
           <c-product-selector
            show-otp-modal={showOtpModal}
@@ -32,9 +36,6 @@
     oncloseotp={handleCloseOtp}
     >
 </c-product-selector>
-
-
-
 
 
  <lightning-input 
