@@ -17,7 +17,7 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
 
     // ---------- SEARCH & FILTER ----------
     searchKey = '';
-    selectedStatus = ''; // All
+    selectedStatus = ''; // All 
 
 
     @track orderProducts = [];
