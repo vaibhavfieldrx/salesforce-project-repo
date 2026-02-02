@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-30-2026
+  @last modified on  : 02-02-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -37,22 +37,40 @@
     >
 </c-product-selector>
 
+       <div class="slds-grid slds-align_absolute-center slds-m-top_medium">
 
- <lightning-input 
-            type="checkbox" 
-            label="OTP Verification Required" 
-            checked={otpRequired} 
+    <!-- PAYMENT STATUS -->
+    <div class="slds-col slds-size_1-of-2">
+        <label class="slds-form-element__label">Payment Status</label>
+        <select
+            class="slds-select"
+            value={paymentStatus}
+            onchange={handlePaymentStatusChange}>
+            <option value="Pending">Pending</option>
+            <option value="Paid">Paid</option>
+        </select>
+    </div>
+
+    <!-- OTP CHECKBOX -->
+    <div class="slds-col slds-size_1-of-2 slds-m-top_large">
+        <lightning-input
+            type="checkbox"
+            label="OTP Verification Required"
+            checked={otpRequired}
             onchange={handleOtpRequiredChange}>
         </lightning-input>
+    </div>
+
+</div>
 
         <!-- Create Order Button -->
       <div class="create-order-wrapper">
-    <lightning-button 
-        label="Create Order" 
-        variant="brand" 
-        class="full-width-btn"
-        onclick={handleCreateOrder}>
-    </lightning-button>
+ <lightning-button
+    label={orderButtonLabel}
+    variant="brand"
+    class="full-width-btn"
+    onclick={handleCreateOrEditOrder}>
+</lightning-button>
 </div>
 
 
@@ -100,17 +118,19 @@
         </div>
 
         <!-- Pagination -->
-        <div class="pagination">
-            <button class="nav-btn" disabled={isFirstPage} onclick={handlePrev}>‹</button>
-
-            <template for:each={pages} for:item="page">
-                <button key={page.number} class={page.class} data-page={page.number} onclick={goToPage}>
-                    {page.number}
-                </button>
-            </template>
-
-            <button class="nav-btn" disabled={isLastPage} onclick={handleNext}>›</button>
-        </div>
+            <div class="pagination">
+    <button class="page-btn" onclick={handlePrev} disabled={isFirstPage}>
+        ‹ Prev
+    </button>
+    <div class="page-info">
+        <span class="page-number">{pageNumber}</span>
+        <span class="page-separator">/</span>
+        <span class="page-total">{totalPages}</span>
+    </div>
+    <button class="page-btn primary" onclick={handleNext} disabled={isLastPage}>
+        Next ›
+    </button>
+</div>
     </template>
 
     <template if:false={hasOrders}>
@@ -124,4 +144,59 @@
 
     </div>
 
+<template if:true={showOtpModal}>
+    <section class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+
+            <!-- HEADER -->
+            <header class="slds-modal__header slds-text-align_center">
+                <lightning-icon
+                    icon-name="utility:lock"
+                    size="small"
+                    class="slds-m-bottom_small">
+                </lightning-icon>
+                <h2 class="slds-text-heading_medium">
+                    OTP Verification
+                </h2>
+                <p class="slds-text-body_small slds-m-top_x-small">
+                    Enter the 6-digit OTP sent to the customer
+                </p>
+            </header>
+
+            <!-- CONTENT -->
+            <div class="slds-modal__content slds-p-around_large">
+                <lightning-input
+                    type="number"
+                    label="One Time Password"
+                    placeholder="Enter OTP"
+                    maxlength="6"
+                    class="slds-m-bottom_medium"
+                    onchange={handleOtpChange}>
+                </lightning-input>
+            </div>
+
+            <!-- FOOTER -->
+            <footer class="slds-modal__footer slds-grid slds-grid_align-end">
+                <lightning-button
+                    label="Cancel"
+                    variant="neutral"
+                    class="slds-m-right_small"
+                    onclick={handleCloseOtp}>
+                </lightning-button>
+
+                <lightning-button
+                    label="Verify OTP"
+                    variant="brand"
+                    onclick={handleVerifyOtp}>
+                </lightning-button>
+            </footer>
+
+        </div>
+    </section>
+
+    <!-- BACKDROP -->
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>
+
+    
 </template>
