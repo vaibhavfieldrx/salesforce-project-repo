@@ -1,17 +1,44 @@
 .attendance-card {
     border-radius: 12px;
 }
-.page {
+/* .page {
 
     max-width: 1300px;   
     margin: 0 auto;     
     padding: 0 24px;     
-}
+} */
 
 .title{
     font-size: 24px;
     font-weight: bold;
 
+}
+/* ================= PAGE ================= */
+
+.page {
+    background: #f9fafb;
+     margin: 0 auto;
+    padding: 16px 24px 32px;
+}
+
+
+/* ================= HEADER  ================= */
+
+.page-header {
+    margin: 12px 0 24px;
+}
+
+.page-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    color: #0f172a;
+}
+
+.page-subtitle {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #64748b;
 }
 .desc{
     color: #a3a1a1;
@@ -25,7 +52,7 @@
 
 .filters {
     display: flex;
-    justify-content: space-between;
+     justify-content: flex-end;
     gap: 1rem;
     padding: 1rem;
 }
@@ -154,13 +181,25 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
-    padding: 1rem;
+    /* padding: 1rem; */
     margin-bottom: 30px;
     margin-top: 20px;
     background: #F9FAFB;
     border-radius:5px;
-    border: 1px solid #e5e7eb;
-box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
+    /* border: 1px solid #e5e7eb; */
+/* box-shadow: 0 0 10px rgba(0, 0, 0, 0.06); */
+}
+.summary-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+/* 📱 Mobile */
+@media (max-width: 768px) {
+    .summary-container {
+        grid-template-columns: repeat(1, 1fr);
+    }
 }
 
 .attendance-container {
@@ -208,6 +247,10 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
     border-radius: 3px;
     background-color: #F9FAFB ;
 }
+.status-filter {
+    width: 160px; /* fixed width */
+}
+
 
 .attendance-table {
     width: 100%;
@@ -270,4 +313,70 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
     text-align: center;
     padding: 40px;
     color: #94a3b8;
+}
+
+
+
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+/* Buttons */
+.page-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.page-btn.primary {
+    background: #45A6A2;
+    border-color: #45A6A2;
+    color: #ffffff;
+}
+
+.page-btn.primary:hover:not(:disabled) {
+    background: #709e9c;
+}
+
+/* Disabled state */
+.page-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Page info */
+.page-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.page-number {
+    font-weight: 600;
+    color: #111827;
+}
+
+.page-total {
+    font-weight: 500;
 }

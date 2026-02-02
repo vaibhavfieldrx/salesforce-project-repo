@@ -7,30 +7,15 @@
 -->
 <template>
      <div class="page">
-
-        
-        <div class="header">
+        <div class="page-header">
             <div>
-                <h1 class="title">Attendance Management</h1>
-                <p class="desc">Track employee attendance records</p>
+                <h1 class="page-title">Attendance Management</h1>
+                <p class="desc">Track attendance records</p>
             </div>
         </div>
-
-
         <!-- Summary Cards -->
-      
               <div class="summary-container">
-
-            <div class="summary-card">
-                <div class="icon blue">
-                    <lightning-icon icon-name="utility:event" size="small"></lightning-icon>
-                </div>
-                <div>
-                    <p class="label">Selected Date</p>
-                    <h2>{selectedDate}</h2>
-                </div>
-            </div>
-
+           
             <div class="summary-card">
                 <div class="icon green">
                     <lightning-icon icon-name="utility:user" size="small"></lightning-icon>
@@ -40,7 +25,6 @@
                     <h2 class="green-text">{presentCount}</h2>
                 </div>
             </div>
-
             <div class="summary-card">
                 <div class="icon red">
                     <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
@@ -50,48 +34,34 @@
                     <h2 class="red-text">{absentCount}</h2>
                 </div>
             </div>
-
-            <div class="summary-card">
-                <div class="icon teal">
-                    <lightning-icon icon-name="utility:clock" size="small"></lightning-icon>
-                </div>
-                <div>
-                    <p class="label">Attendance Rate</p>
-                    <h2>{attendanceRate}%</h2>
-                </div>
-            </div>
-
+           
         </div>
-      
 <div class="attendance-container">
-        <!-- Filters -->
-        <div class="filters">
-            <lightning-input type="search" placeholder="Search employees..." onchange={handleSearch}></lightning-input>
-            <lightning-input type="date" value={selectedDate} onchange={handleDateChange}></lightning-input>
-        </div>
-
+       <!-- Filters -->
+<div class="filters">
+    <lightning-combobox
+        class="status-filter"
+        value={selectedStatus}
+        options={statusOptions}
+        onchange={handleStatusChange}>
+    </lightning-combobox>
+</div>
         <!-- Table -->
         <table class="attendance-table">
             <thead>
                 <tr>
-                    <th>Employee</th>
-                    <th>Role</th>
-                    <th>Department</th>
                     <th>Check In</th>
                     <th>Check Out</th>
                     <th>Status</th>
                 </tr>
             </thead>
-
             <tbody>
                 <template for:each={attendanceList} for:item="rec">
                     <tr key={rec.id}>
-                        <td class="employee-cell">
+                        <!-- <td class="employee-cell">
                             <div class="avatar">{rec.initial}</div>
                             {rec.name}
-                        </td>
-                        <td>{rec.role}</td>
-                        <td>{rec.department}</td>
+                        </td> -->
                         <td>{rec.checkIn}</td>
                         <td>{rec.checkOut}</td>
                         <td>
@@ -99,7 +69,6 @@
                         </td>
                     </tr>
                 </template>
-
                 <template if:false={attendanceList.length}>
                     <tr>
                         <td colspan="6" class="empty">No records found</td>
@@ -107,25 +76,20 @@
                 </template>
             </tbody>
         </table>
-
         <!-- Pagination -->
-        <div class="pagination-modern">
-            <button class="page-btn" onclick={handlePrevious} disabled={disablePrevious}>‹</button>
-
-            <template for:each={paginationList} for:item="p">
-                <button
-                    key={p.number}
-                    data-page={p.number}
-                    class={p.className}
-                    onclick={handlePageClick}>
-                    {p.number}
-                </button>
-            </template>
-
-            <button class="page-btn" onclick={handleNext} disabled={disableNext}>›</button>
-        </div>
-
+       <div class="pagination">
+    <button class="page-btn" onclick={prevPage} disabled={isFirstPage}>
+        ‹ Prev
+    </button>
+    <div class="page-info">
+        <span class="page-number">{currentPage}</span>
+        <span class="page-separator">/</span>
+        <span class="page-total">{totalPages}</span>
+    </div>
+    <button class="page-btn primary" onclick={nextPage} disabled={isLastPage}>
+        Next ›
+    </button>
+</div>
     </div>
      </div>
-  
 </template>
