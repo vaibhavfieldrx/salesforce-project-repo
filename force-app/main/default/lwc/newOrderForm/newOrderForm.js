@@ -15,10 +15,11 @@ export default class NewOrderForm extends NavigationMixin(LightningElement) {
     /* ===================== MODE ===================== */
     mode = 'create'; // create | edit
     orderId;
-@track orderData;
+    @track orderData;
     /* ===================== STATE ===================== */
     customerId;
     selectedCustomer;
+    @track enteredOtp = '';
 
     @track products = [];
     orderProducts = [];
@@ -51,6 +52,15 @@ export default class NewOrderForm extends NavigationMixin(LightningElement) {
         return this.pageNumber === this.totalPages;
     }
 
+    handleOtpChange(event) {
+    this.enteredOtp = event.target.value;
+}
+
+    handlePaymentStatusChange(event) {
+        this.paymentStatus = event.target.value;
+        this.notifyParent();
+    }
+
     /* ===================== ROUTING ===================== */
     @wire(CurrentPageReference)
     getPageParams(pageRef) {
@@ -65,42 +75,41 @@ export default class NewOrderForm extends NavigationMixin(LightningElement) {
     }
 
     get hasOrders() {
-    return this.orders && this.orders.length > 0;
-}
+        return this.orders && this.orders.length > 0;
+    }
 
-openOrderModal(){
-    this[NavigationMixin.Navigate]({
+    openOrderModal() {
+        this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
             attributes: {
                 url: '/order'
             }
         });
-}
-async loadOrderHistory() {
-    if (!this.customerId) return;
-
-    try {
-        this.isLoading = true;
-
-        const result = await getOrderHistory({
-            accountId: this.customerId,
-            pageSize: this.pageSize,
-            pageNumber: this.pageNumber
-        });
-
-       this.orders = (result.orders || []).map(order => ({
-    ...order,
-    statusClass: this.getStatusClass(order.Status)
-}));
-        this.totalRecords = result.totalRecords || 0;
-        this.updatePages();
-
-    } catch (error) {
-        console.error('Order history error', error);
-    } finally {
-        this.isLoading = false;
     }
-}
+    async loadOrderHistory() {
+        if (!this.customerId) return;
+        try {
+            this.isLoading = true;
+
+            const result = await getOrderHistory({
+                accountId: this.customerId,
+                pageSize: this.pageSize,
+                pageNumber: this.pageNumber
+            });
+
+            this.orders = (result.orders || []).map(order => ({
+                ...order,
+                statusClass: this.getStatusClass(order.Status)
+            }));
+            this.totalRecords = result.totalRecords || 0;
+            this.updatePages();
+
+        } catch (error) {
+            console.error('Order history error', error);
+        } finally {
+            this.isLoading = false;
+        }
+    }
 
     updatePages() {
         this.pages = Array.from({ length: this.totalPages }, (_, i) => {
@@ -118,6 +127,7 @@ async loadOrderHistory() {
         this.customerId = event.detail.accountId;
         this.pageNumber = 1;
         this.isLoading = true;
+        this.loadOrderHistory();
     }
 
     /* ===================== ALERT ===================== */
@@ -138,11 +148,11 @@ async loadOrderHistory() {
     }
 
     async handleProductsSelected(event) {
-        const { products, totalAmount, paymentStatus } = event.detail;
+        const { products, totalAmount, totalDiscount } = event.detail;
 
         this.orderProducts = products;
         this.orderTotal = totalAmount;
-        this.paymentStatus = paymentStatus;
+        this.discount = totalDiscount;
 
         const productIds = products.map(p => p.productId);
         const priceData = await getProducts({ productIds });
@@ -154,7 +164,6 @@ async loadOrderHistory() {
                 name: p.Name,
                 price: priceObj ? priceObj.price : p.unitPrice,
                 qty: p.quantity,
-                discount: p.discount,
             };
         });
 
@@ -167,7 +176,7 @@ async loadOrderHistory() {
 
         this.products = this.products.map(p => {
             if (p.id === id) p.qty = qty;
-            return p;   
+            return p;
         });
 
         this.calculateTotal();
@@ -194,17 +203,29 @@ async loadOrderHistory() {
         if (this.otpRequired) {
             this.showOtpModal = true;
         } else {
-        this.mode === 'edit'
-            ? this.updateOrder()
-            : this.createOrder();
-    
+            this.mode === 'edit'
+                ? this.updateOrder()
+                : this.createOrder();
+
             // this.createOrder();
         }
     }
 
+    get orderButtonLabel() {
+        return this.isEditMode ? 'Edit Order' : 'Create Order';
+    }
+    
     handleVerifyOtp() {
-        this.showOtpModal = false;
-        this.createOrder();
+       if (!this.enteredOtp || this.enteredOtp.length < 4) {
+        this.showAlert('Error', 'Please enter a valid OTP', 'error');
+        return;
+    }
+
+    this.showOtpModal = false;
+
+    this.mode === 'edit'
+        ? this.updateOrder()
+        : this.createOrder();
     }
 
     handleCloseOtp() {
@@ -253,89 +274,89 @@ async loadOrderHistory() {
     }
 
     /* ===================== EDIT ===================== */
-  async loadOrderForEdit() {
-    try {
-        const data = await getOrderForEdit({ orderId: this.orderId });
+    async loadOrderForEdit() {
+        try {
+            const data = await getOrderForEdit({ orderId: this.orderId });
 
-        this.customerId = data.accountId;
-        this.selectedCustomer = { accountId: data.accountId };
+            this.customerId = data.accountId;
+            this.selectedCustomer = { accountId: data.accountId };
+            console.log("dataaaaa", data)
+            this.orderAddressData = {
+                billingAddress: data.billingAddress,
+                shippingAddress: data.shippingAddress,
+                warehouseId: data.warehouseId
+            };
 
-        this.orderAddressData = {
-            billingAddress: data.billingAddress,
-            shippingAddress: data.shippingAddress,
-            warehouseId: data.warehouseId
+            await Promise.resolve();
+
+              const productCmp = this.template.querySelector('c-product-selector');
+        if (productCmp) {
+            productCmp.setEditProducts(data.products, data.Discount);
+        }
+
+
+            this.calculateTotal();
+
+            // ✅ SAFE HISTORY LOAD
+            this.pageNumber = 1;
+            this.loadOrderHistory();
+
+        } catch (e) {
+            console.error(e);
+            this.showAlert('Error', 'Failed to load order', 'error');
+        }
+    }
+    get isEditMode() {
+        return this.mode === 'edit';
+    }
+
+    updateOrder() {
+        const payload = {
+            orderId: this.orderId,
+            totalAmount: this.total,
+            discount: this.discount,
+            discountAmount: this.orderTotal,
+            paymentStatus: this.paymentStatus,
+            warehouseId: this.orderAddressData.warehouseId,
+            billToContactId: this.selectedCustomer.contactId,
+            billingAddress: this.orderAddressData.billingAddress,
+            shippingAddress: this.orderAddressData.shippingAddress,
+
+            products: this.products.map(p => ({
+                productId: p.id,
+                quantity: p.qty,
+                unitPrice: p.price
+            }))
         };
 
-        setTimeout(() => {
-            const productCmp = this.template.querySelector('c-product-selector');
-            if (productCmp) {
-                productCmp.setEditProducts(data.products);
-            }
-        }, 0);
-
-        this.calculateTotal();
-
-        // ✅ SAFE HISTORY LOAD
-        this.pageNumber = 1;
-        this.loadOrderHistory();
-
-    } catch (e) {
-        console.error(e);
-        this.showAlert('Error', 'Failed to load order', 'error');
+        updateOrderWithItems({ orderJson: JSON.stringify(payload) })
+            .then(() => this.showUpdateSuccess())
+            .catch(err =>
+                this.showAlert(
+                    'Error',
+                    err?.body?.message || 'Update failed',
+                    'error'
+                )
+            );
     }
-}
-    get isEditMode() {
-    return this.mode === 'edit';
-}
-
- updateOrder() {
-    const payload = {
-        orderId: this.orderId,
-        totalAmount: this.total,
-        discount: this.discount,
-        discountAmount: this.orderTotal,
-        paymentStatus: this.paymentStatus,
-        warehouseId: this.orderAddressData.warehouseId,
-        billToContactId: this.selectedCustomer.contactId,
-        billingAddress: this.orderAddressData.billingAddress,
-        shippingAddress: this.orderAddressData.shippingAddress,
-
-        products: this.products.map(p => ({
-            productId: p.id,
-            quantity: p.qty,
-            unitPrice: p.price,
-            discount: p.discount || 0
-        }))
-    };
-
-    updateOrderWithItems({ orderJson: JSON.stringify(payload) })
-        .then(() => this.showUpdateSuccess())
-        .catch(err =>
-            this.showAlert(
-                'Error',
-                err?.body?.message || 'Update failed',
-                'error'
-            )
-        );
-}
 
 
     getStatusClass(status) {
-    if (!status) return 'status-default';
+        if (!status) return 'status-default';
 
-    switch (status.toLowerCase()) {
-        case 'draft':
-            return 'status-draft';
-        case 'completed':
-            return 'status-completed';
-        case 'pending':
-            return 'status-pending';
-        case 'cancelled':
-            return 'status-cancelled';
-        default:
-            return 'status-default';
+        switch (status.toLowerCase()) {
+            case 'draft':
+                return 'status-draft';
+            case 'completed':
+                return 'status-completed';
+            case 'pending':
+                return 'status-pending';
+            case 'cancelled':
+                return 'status-cancelled';
+            default:
+                return 'status-default';
+        }
     }
-}
 
     async showUpdateSuccess() {
         await LightningAlert.open({
@@ -347,26 +368,26 @@ async loadOrderHistory() {
     }
 
     /* ===================== SAVE ===================== */
-   
+
 
 
     handlePrev() {
-    if (this.isFirstPage) return;
-    this.pageNumber--;
-    this.loadOrderHistory();
-}
+        if (this.isFirstPage) return;
+        this.pageNumber--;
+        this.loadOrderHistory();
+    }
 
-handleNext() {
-    if (this.isLastPage) return;
-    this.pageNumber++;
-    this.loadOrderHistory();
-}
+    handleNext() {
+        if (this.isLastPage) return;
+        this.pageNumber++;
+        this.loadOrderHistory();
+    }
 
-goToPage(event) {
-    const page = Number(event.target.dataset.page);
-    if (page === this.pageNumber) return;
-    this.pageNumber = page;
-    this.loadOrderHistory();
-}
+    goToPage(event) {
+        const page = Number(event.target.dataset.page);
+        if (page === this.pageNumber) return;
+        this.pageNumber = page;
+        this.loadOrderHistory();
+    }
 }
 

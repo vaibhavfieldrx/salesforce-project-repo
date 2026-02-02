@@ -1,275 +1,183 @@
-import { LightningElement, wire, track, api } from 'lwc';
+import { LightningElement, wire, track,api } from 'lwc';
 import getAllProducts from '@salesforce/apex/ProductController.getAllProducts';
-import { refreshApex } from '@salesforce/apex';
+
 export default class ProductSelector extends LightningElement {
+
     @track products = [];
     @track selectedProducts = [];
-    @track paymentStatus = 'Pending';
-    @track otpRequired = true;
-    @track otp = '';
-    @track previousOrders = [];
-    totalRecords = 0;
+    @track selectedRowIds = [];
+   @api editProducts = [];
+    @track showProductModal = false;
+
+    @track totalDiscount = 0;
+    @track finalAmount = 0;
+
     pageSize = 15;
     currentPage = 1;
-    totalAmount = 0;
-    @track otpRequired = false;
-    @track otpArray = [
-        { id: 'otp-0', value: '' },
-        { id: 'otp-1', value: '' },
-        { id: 'otp-2', value: '' },
-        { id: 'otp-3', value: '' },
-        { id: 'otp-4', value: '' },
-        { id: 'otp-5', value: '' }
-    ];
-
-    @track otp = '';
-    @api showOtpModal = false;
-
-
-
-    // ===== APEX =====
-    @wire(getAllProducts, {
-        pageSize: '$pageSize',
-        pageNumber: '$currentPage'
-    })
-    wiredProducts({ data, error }) {
-        if (data) {
-            this.totalRecords = data.totalRecords;
-            this.products = data.products.map(p => ({
-                ...p,
-                selected: this.isSelected(p.id)
-            }));
-        } else if (error) {
-            console.error(error);
-        }
-    }
-
-    // ===== PAGINATION =====
-    get totalPages() { return Math.ceil(this.totalRecords / this.pageSize); }
-    get isFirstPage() { return this.currentPage === 1; }
-    get isLastPage() { return this.currentPage >= this.totalPages; }
-  handlePrev() {
-    if (this.isFirstPage) return;
-    this.pageNumber--;
-    this.refreshOrders();
-}
-
-handleNext() {
-    if (this.isLastPage) return;
-    this.pageNumber++;
-    this.refreshOrders();
-}
-
-async refreshOrders() {
-    if (this.customerId && this.wiredOrdersResult) {
-        try {
-            this.isLoading = true;
-            await refreshApex(this.wiredOrdersResult);
-        } catch (err) {
-            console.error('Error refreshing orders', err);
-        } finally {
-            this.isLoading = false;
-        }
-    }
-}
-
-goToPage(event) {
-    const page = parseInt(event.target.dataset.page, 10);
-    if (page === this.pageNumber) return;
-    this.pageNumber = page;
-    this.refreshOrders();
-}
-
-
-
-    // ===== SELECT PRODUCT =====
-    handleSelect(event) {
-        const id = event.target.dataset.id;
-        const checked = event.target.checked;
-
-        if (checked) {
-            const prod = this.products.find(p => p.id === id);
-            this.selectedProducts.push({
-                ...prod,
-                qty: 1,
-                subtotal: prod?.price || 0,
-                discount: 0,
-                displaySubtotal: prod?.price || 0
-            });
-        } else {
-            this.selectedProducts = this.selectedProducts.filter(p => p.id !== id);
-        }
-
-        this.refreshSelection();
-        this.calculateTotal();
-        this.notifyParent();
-    }
-
-    // ===== QTY CHANGE =====
-    handleQtyChange(event) {
-        const id = event.target.dataset.id;
-        const qty = parseInt(event.target.value, 10) || 1;
-
-        this.selectedProducts = this.selectedProducts.map(p =>
-            p.id === id
-                ? {
-                    ...p,
-                    qty,
-                    subtotal: p.price * qty,
-                    displaySubtotal: p.price * qty - (p.discount || 0)
-                }
-                : p
-        );
-
-        this.calculateTotal();
-        this.notifyParent();
-    }
-
-    // ===== DISCOUNT CHANGE =====
-    handleDiscountChange(event) {
-        const id = event.target.dataset.id;
-        const discount = parseFloat(event.target.value) || 0;
-
-        this.selectedProducts = this.selectedProducts.map(p =>
-            p.id === id
-                ? { ...p, discount, displaySubtotal: p.subtotal - discount }
-                : p
-        );
-
-        this.calculateTotal();
-        this.notifyParent();
-    }
-
-    // ===== PAYMENT STATUS =====
-    handlePaymentStatusChange(event) {
-        this.paymentStatus = event.target.value;
-        this.notifyParent();
-    }
-
-    // ===== OTP =====
-    handleOtpChange(event) {
-        this.otp = event.target.value;
-    }
-    verifyOtp() {
-        if (this.otp === '123456') {
-            this.otpRequired = false;
-            alert('OTP Verified!');
-        } else {
-            alert('Invalid OTP');
-        }
-    }
-
-    handleOtpDigitChange(event) {
-        const id = event.target.dataset.id;
-        const value = event.target.value.replace(/\D/, '');
-        this.otpArray = this.otpArray.map(d => d.id === id ? { ...d, value } : d);
-
-        const index = this.otpArray.findIndex(d => d.id === id);
-        if (value && index < this.otpArray.length - 1) {
-            this.template.querySelectorAll('.otp-input')[index + 1].focus();
-        }
-
-        this.otp = this.otpArray.map(d => d.value).join('');
-    }
-
-
+    totalRecords = 0;
 
     @api
-setEditProducts(orderProducts) {
-    if (!orderProducts || !orderProducts.length) return;
+setEditProducts(orderProducts, discount) {
+    if (!orderProducts?.length) return;
 
+    this.editProducts = orderProducts;
+    this.totalDiscount = discount;
     this.selectedProducts = orderProducts.map(p => ({
         id: p.productId,
         name: p.name,
         price: p.unitPrice,
         qty: p.quantity,
-        discount: p.discount || 0,
-        subtotal: p.unitPrice * p.quantity,
-        displaySubtotal: (p.unitPrice * p.quantity) - (p.discount || 0),
-        selected: true
+        subtotal: p.unitPrice * p.quantity
     }));
 
-    this.refreshSelection();
+    // if products already loaded
+    if (this.products?.length) {
+        this.selectedRowIds = orderProducts
+            .map(p => p.productId)
+            .filter(id => this.products.some(pr => pr.id === id));
+    }
+
     this.calculateTotal();
     this.notifyParent();
 }
 
+    columns = [
+        { label: 'Name', fieldName: 'name' },
+        { label: 'Code', fieldName: 'productCode' },
+        { label: 'Price', fieldName: 'price', type: 'currency' }
+    ];
 
+    /* ================= APEX ================= */
+    @wire(getAllProducts, {
+        pageSize: '$pageSize',
+        pageNumber: '$currentPage'
+    })
+    wiredProducts({ data }) {
+        if (data) {
+            this.products = data.products;
+            this.totalRecords = data.totalRecords;
 
-closeOtpModal() {
-    this.dispatchEvent(new CustomEvent('closeotp'));
-}
+            if (this.editProducts?.length) {
+            this.selectedRowIds = this.editProducts
+                .map(p => p.productId)
+                .filter(id => this.products.some(pr => pr.id === id));
+        }
+        }
+    }
 
-    // ===== TOTAL =====
-    calculateTotal() {
-        this.totalAmount = this.selectedProducts.reduce(
-            (sum, p) => sum + (p.displaySubtotal || 0),
-            0
+    /* ================= MODAL ================= */
+    openProductModal() {
+        this.selectedRowIds = this.selectedProducts.map(p => p.id);
+        this.showProductModal = true;
+    }
+
+    closeProductModal() {
+        this.showProductModal = false;
+    }
+
+    /* ================= PAGINATION ================= */
+    get totalPages() {
+        return Math.ceil(this.totalRecords / this.pageSize);
+    }
+    get isFirstPage() {
+        return this.currentPage === 1;
+    }
+    get isLastPage() {
+        return this.currentPage >= this.totalPages;
+    }
+
+    handlePrev() {
+        if (!this.isFirstPage) this.currentPage--;
+    }
+
+    handleNext() {
+        if (!this.isLastPage) this.currentPage++;
+    }
+
+    /* ================= TABLE SELECTION ================= */
+    handleRowSelection(event) {
+        const rows = event.detail.selectedRows;
+        const map = new Map(this.selectedProducts.map(p => [p.id, p]));
+
+        rows.forEach(r => {
+            if (!map.has(r.id)) {
+                map.set(r.id, {
+                    id: r.id,
+                    name: r.name,
+                    price: r.price,
+                    qty: 1,
+                    subtotal: r.price
+                });
+            }
+        });
+
+        map.forEach((v, k) => {
+            if (!rows.find(r => r.id === k)) {
+                map.delete(k);
+            }
+        });
+
+        this.selectedProducts = Array.from(map.values());
+        this.selectedRowIds = rows.map(r => r.id);
+
+        this.calculateTotal();
+        this.notifyParent();
+    }
+
+    /* ================= ORDER ITEMS ================= */
+    handleQtyChange(event) {
+        const id = event.target.dataset.id;
+        const qty = Number(event.target.value);
+
+        this.selectedProducts = this.selectedProducts.map(p =>
+            p.id === id
+                ? { ...p, qty, subtotal: qty * p.price }
+                : p
         );
-    }
 
-    // ===== HELPERS =====
-    isSelected(id) {
-        return this.selectedProducts.some(p => p.id === id);
-    }
-
-    refreshSelection() {
-        this.products = this.products.map(p => ({
-            ...p,
-            selected: this.isSelected(p.id)
-        }));
+        this.calculateTotal();
+        this.notifyParent();
     }
 
     handleRemoveItem(event) {
         const id = event.currentTarget.dataset.id;
         this.selectedProducts = this.selectedProducts.filter(p => p.id !== id);
-        this.products = this.products.map(p =>
-            p.id === id ? { ...p, selected: false } : p
-        );
+        this.selectedRowIds = this.selectedProducts.map(p => p.id);
+
         this.calculateTotal();
+        this.notifyParent();
     }
 
-    notifyParent() {
-        console.log("this.selectedProducts", this.selectedProducts)
-        const payload = {
-            products: this.selectedProducts.map(p =>
-                (
-                    {
-                        productId: p.id,
-                        name: p.name,
-                        quantity: p.qty,
-                        unitPrice: p.price,
-                        discount: p.discount || 0,
-                        lineTotal: p.displaySubtotal
-                    })),
-            totalAmount: this.totalAmount,
-            paymentStatus: this.paymentStatus
-        };
+    /* ================= TOTAL DISCOUNT ================= */
+    handleTotalDiscountChange(event) {
+        this.totalDiscount = Number(event.target.value || 0);
+        this.calculateTotal();
+        this.notifyParent();
+    }
 
-        this.dispatchEvent(
-            new CustomEvent('productsselected', {
-                detail: payload
-            })
+    calculateTotal() {
+        const grossTotal = this.selectedProducts.reduce(
+            (sum, p) => sum + (p.subtotal || 0),
+            0
         );
+
+        this.finalAmount = Math.max(grossTotal - this.totalDiscount, 0);
     }
 
 
-    verifyAndCreateOrder() {
-    const otp = this.otpArray.map(d => d.value).join('');
-
-    if (otp.length !== 6) {
-        alert('Please enter valid 6-digit OTP');
-        return;
+    /* ================= PARENT EVENT ================= */
+    notifyParent() {
+        this.dispatchEvent(new CustomEvent('productsselected', {
+            detail: {
+                products: this.selectedProducts.map(p => ({
+                    productId: p.id,
+                    quantity: p.qty,
+                    unitPrice: p.price,
+                    lineTotal: p.subtotal
+                })),
+                totalDiscount: this.totalDiscount,
+                totalAmount: this.finalAmount
+            }
+        }));
     }
-
-    // ❌ DO NOT create order here
-    // ✅ JUST notify parent
-    this.dispatchEvent(
-        new CustomEvent('verifyotp', {
-            detail: { otp }
-        })
-    );
-}
-
-    
 }

@@ -2,57 +2,83 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 01-30-2026
+ * @last modified on  : 02-02-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class OrderController {
 
-    @AuraEnabled
-    public static Id createOrderWithItems(String orderJson) {
-        try {
-            System.debug('Incoming JSON => ' + orderJson);
+@AuraEnabled
+public static Id createOrderWithItems(String orderJson) {
+    try {
+        System.debug('Incoming JSON => ' + orderJson);
 
-            Map<String, Object> orderData =
-                (Map<String, Object>) JSON.deserializeUntyped(orderJson);
+        // ================= DESERIALIZE =================
+        Map<String, Object> orderData =
+            (Map<String, Object>) JSON.deserializeUntyped(orderJson);
 
-            // ================= PRICEBOOK =================
-            Id standardPricebookId = [
-                SELECT Id FROM Pricebook2 WHERE IsStandard = true LIMIT 1
-            ].Id;
+        // ================= STANDARD PRICEBOOK =================
+        List<Pricebook2> pbList = [
+            SELECT Id
+            FROM Pricebook2
+            WHERE IsStandard = true
+            LIMIT 1
+        ];
 
-            // ================= ORDER =================
-            Order ord = new Order();
-            ord.AccountId = (Id) orderData.get('accountId');
-            ord.BillToContactId = (Id) orderData.get('billToContactId');
-            ord.Status = 'Draft';
-            ord.EffectiveDate = Date.today();
-            ord.Payment_Status__c = (String) orderData.get('paymentStatus');
-            ord.Pricebook2Id = standardPricebookId;
-            ord.Discount__c = (Decimal) orderData.get('discount');
-            ord.Discounted_Amount__c = (Decimal) orderData.get('discountAmount');
+        if (pbList.isEmpty()) {
+            throw new AuraHandledException('Standard Pricebook not found');
+        }
 
-            // -------- Customer Email & Phone --------
-            Account acc = [
-                SELECT Email__c, Phone
-                FROM Account
-                WHERE Id = :ord.AccountId
-                LIMIT 1
-            ];
+        Id standardPricebookId = pbList[0].Id;
 
-              Contract contract = [
-                SELECT Id
-                FROM Contract
-                WHERE AccountId = :ord.AccountId
-                LIMIT 1
-            ];
-            ord.ContractId = contract.Id;
-            ord.Customer_Email__c = acc.Email__c;
-            ord.Customer_Mobile__c = acc.Phone;
+        // ================= ORDER =================
+        Order ord = new Order();
+        ord.AccountId = (Id) orderData.get('accountId');
+        ord.BillToContactId = (Id) orderData.get('billToContactId');
+        ord.Status = 'Draft';
+        ord.EffectiveDate = Date.today();
+        ord.Payment_Status__c = (String) orderData.get('paymentStatus');
+        ord.Pricebook2Id = standardPricebookId;
+        ord.Discount__c = (Decimal) orderData.get('discount');
+        ord.Discounted_Amount__c = (Decimal) orderData.get('discountAmount');
+        ord.Warehouse__c = (Id) orderData.get('warehouseId');
 
-            // ---------- Billing ----------
-            Map<String, Object> billing =
-                (Map<String, Object>) orderData.get('billingAddress');
+        if (ord.AccountId == null) {
+            throw new AuraHandledException('Account is required to create Order');
+        }
 
+        // ================= ACCOUNT =================
+        List<Account> accList = [
+            SELECT Email__c, Phone
+            FROM Account
+            WHERE Id = :ord.AccountId
+            LIMIT 1
+        ];
+
+        if (accList.isEmpty()) {
+            throw new AuraHandledException('Account not found');
+        }
+
+        Account acc = accList[0];
+        ord.Customer_Email__c = acc.Email__c;
+        ord.Customer_Mobile__c = acc.Phone;
+
+        // ================= CONTRACT (OPTIONAL) =================
+        List<Contract> contractList = [
+            SELECT Id
+            FROM Contract
+            WHERE AccountId = :ord.AccountId
+            LIMIT 1
+        ];
+
+        if (!contractList.isEmpty()) {
+            ord.ContractId = contractList[0].Id;
+        }
+
+        // ================= BILLING ADDRESS =================
+        Map<String, Object> billing =
+            (Map<String, Object>) orderData.get('billingAddress');
+
+        if (billing != null) {
             ord.BillingStreet     = (String) billing.get('street');
             ord.BillingCity       = (String) billing.get('city');
             ord.BillingState      = (String) billing.get('state');
@@ -60,11 +86,13 @@ public with sharing class OrderController {
             ord.BillingCountry    = normalizeCountry(
                 (String) billing.get('country')
             );
+        }
 
-            // ---------- Shipping ----------
-            Map<String, Object> shipping =
-                (Map<String, Object>) orderData.get('shippingAddress');
+        // ================= SHIPPING ADDRESS =================
+        Map<String, Object> shipping =
+            (Map<String, Object>) orderData.get('shippingAddress');
 
+        if (shipping != null) {
             ord.ShippingStreet     = (String) shipping.get('street');
             ord.ShippingCity       = (String) shipping.get('city');
             ord.ShippingState      = (String) shipping.get('state');
@@ -72,66 +100,71 @@ public with sharing class OrderController {
             ord.ShippingCountry    = normalizeCountry(
                 (String) shipping.get('country')
             );
-
-            ord.Warehouse__c = (Id) orderData.get('warehouseId');
-
-            insert ord;
-
-            // ================= ORDER ITEMS =================
-            List<Object> products =
-                (List<Object>) orderData.get('products');
-
-            // 1️⃣ Collect productIds
-            Set<Id> productIds = new Set<Id>();
-            for (Object obj : products) {
-                Map<String, Object> p = (Map<String, Object>) obj;
-                productIds.add((Id) p.get('productId'));
-            }
-
-            // 2️⃣ Query PricebookEntries ONCE
-            Map<Id, PricebookEntry> pbeMap = new Map<Id, PricebookEntry>();
-            for (PricebookEntry pbe : [
-                SELECT Id, Product2Id, UnitPrice
-                FROM PricebookEntry
-                WHERE Product2Id IN :productIds
-                AND Pricebook2Id = :standardPricebookId
-                AND IsActive = true
-            ]) {
-                pbeMap.put(pbe.Product2Id, pbe);
-            }
-
-            // 3️⃣ Create OrderItems
-            List<OrderItem> items = new List<OrderItem>();
-
-            for (Object obj : products) {
-                Map<String, Object> p = (Map<String, Object>) obj;
-                Id productId = (Id) p.get('productId');
-
-                if (!pbeMap.containsKey(productId)) {
-                    throw new AuraHandledException(
-                        'Product not in Standard Pricebook: ' + productId
-                    );
-                }
-
-                OrderItem oi = new OrderItem();
-                oi.OrderId = ord.Id;
-                oi.PricebookEntryId = pbeMap.get(productId).Id;
-                oi.Quantity = (Decimal) p.get('quantity');
-                oi.UnitPrice = (Decimal) p.get('unitPrice');
-                oi.ServiceDate = Date.today();
-                oi.Discount__c = (Integer) p.get('Discount');
-
-                items.add(oi);
-            }
-
-            insert items;
-            return ord.Id;
-
-        } catch (Exception e) {
-            System.debug('❌ ERROR => ' + e.getMessage());
-            throw new AuraHandledException(e.getMessage());
         }
+
+        insert ord;
+
+        // ================= PRODUCTS =================
+        List<Object> products =
+            (List<Object>) orderData.get('products');
+
+        if (products == null || products.isEmpty()) {
+            throw new AuraHandledException('At least one product is required');
+        }
+
+        // ================= COLLECT PRODUCT IDS =================
+        Set<Id> productIds = new Set<Id>();
+        for (Object obj : products) {
+            Map<String, Object> p = (Map<String, Object>) obj;
+            productIds.add((Id) p.get('productId'));
+        }
+
+        // ================= PRICEBOOK ENTRIES =================
+        Map<Id, PricebookEntry> pbeMap = new Map<Id, PricebookEntry>();
+
+        for (PricebookEntry pbe : [
+            SELECT Id, Product2Id, UnitPrice
+            FROM PricebookEntry
+            WHERE Product2Id IN :productIds
+            AND Pricebook2Id = :standardPricebookId
+            AND IsActive = true
+        ]) {
+            pbeMap.put(pbe.Product2Id, pbe);
+        }
+
+        // ================= ORDER ITEMS =================
+        List<OrderItem> items = new List<OrderItem>();
+
+        for (Object obj : products) {
+            Map<String, Object> p = (Map<String, Object>) obj;
+            Id productId = (Id) p.get('productId');
+
+            if (!pbeMap.containsKey(productId)) {
+                throw new AuraHandledException(
+                    'Product not in Standard Pricebook: ' + productId
+                );
+            }
+
+            OrderItem oi = new OrderItem();
+            oi.OrderId = ord.Id;
+            oi.PricebookEntryId = pbeMap.get(productId).Id;
+            oi.Quantity = (Decimal) p.get('quantity');
+            oi.UnitPrice = (Decimal) p.get('unitPrice');
+            oi.ServiceDate = Date.today();
+
+            items.add(oi);
+        }
+
+        insert items;
+
+        return ord.Id;
+
+    } catch (Exception e) {
+        System.debug('❌ ERROR => ' + e.getMessage());
+        throw new AuraHandledException(e.getMessage());
     }
+}
+
 @AuraEnabled
 public static void updateOrderWithItems(String orderJson) {
     try {
@@ -247,9 +280,6 @@ public static void updateOrderWithItems(String orderJson) {
             oi.PricebookEntryId = pbeMap.get(productId).Id;
             oi.Quantity = (Decimal) p.get('quantity');
             oi.UnitPrice = (Decimal) p.get('unitPrice');
-            oi.Discount__c = p.containsKey('discount')
-                ? (Decimal) p.get('discount')
-                : 0;
             oi.ServiceDate = Date.today();
 
             newItems.add(oi);
@@ -341,8 +371,7 @@ public static void updateOrderWithItems(String orderJson) {
                    (
                        SELECT Product2Id,
                               Quantity,
-                              UnitPrice,
-                              Discount__c
+                              UnitPrice
                        FROM OrderItems
                    )
             FROM Order
@@ -411,7 +440,6 @@ public static void updateOrderWithItems(String orderJson) {
             productId = oi.Product2Id;
             quantity = oi.Quantity;
             unitPrice = oi.UnitPrice;
-            discount = oi.Discount__c;
         }
     }
 
