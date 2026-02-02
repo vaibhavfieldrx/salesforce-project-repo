@@ -3,38 +3,45 @@ import getFEAttendance from '@salesforce/apex/AttendanceController.getFEAttendan
 
 export default class AttendanceRecord extends LightningElement {
 
-    // Filters
-    selectedDate = new Date().toISOString().split('T')[0];
+    // ---------------- FILTERS ----------------
+    selectedStatus = 'All';
     searchKey = '';
 
-    // Data
+    statusOptions = [
+        { label: 'All', value: 'All' },
+        { label: 'Present', value: 'Present' },
+        { label: 'Absent', value: 'Absent' },
+        { label: 'Late', value: 'Late' }
+    ];
+
+    // ---------------- DATA ----------------
     @track fullData = [];
     @track attendanceList = [];
 
-    // Pagination
+    // ---------------- PAGINATION ----------------
     pageSize = 5;
     pageNumber = 1;
-    totalPages = 0;
+    totalPages = 1;
 
-    // Summary
+    // ---------------- SUMMARY ----------------
     presentCount = 0;
     absentCount = 0;
-    attendanceRate = 0;
 
-    @wire(getFEAttendance, { selectedDate: '$selectedDate' })
+    // ---------------- DATA LOAD ----------------
+    @wire(getFEAttendance)
     wiredAttendance({ data, error }) {
         if (data) {
-         this.fullData = data.map(rec => ({
-    id: rec.userId,
-    name: rec.userName,
-    initial: rec.userName ? rec.userName.charAt(0).toUpperCase() : '',
-    role: rec.role ? rec.role : "NA",
-    department: rec.department ? rec.department : "NA",
-    checkIn: rec.checkIn?.split("T")[0] ? rec.checkIn?.split("T")[0] : "NA",
-    checkOut: rec.checkOut?.split("T")[0] ? rec.checkOut?.split("T")[0] : "NA",
-    status: rec.status,
-    statusClass: this.getStatusClass(rec.status)
-}));
+            this.fullData = data.map(rec => ({
+                id: rec.userId,
+                name: rec.userName,
+                initial: rec.userName ? rec.userName.charAt(0).toUpperCase() : '',
+                role: rec.role || 'NA',
+                department: rec.department || 'NA',
+                checkIn: rec.checkIn ? rec.checkIn.split('T')[0] : 'NA',
+                checkOut: rec.checkOut ? rec.checkOut.split('T')[0] : 'NA',
+                status: rec.status,
+                statusClass: this.getStatusClass(rec.status)
+            }));
 
             this.pageNumber = 1;
             this.applyFilters();
@@ -43,39 +50,52 @@ export default class AttendanceRecord extends LightningElement {
         }
     }
 
-    // ---------- Filters ----------
-    handleSearch(event) {
-        this.searchKey = event.target.value.toLowerCase();
+    // ---------------- FILTER HANDLERS ----------------
+    handleStatusChange(event) {
+        this.selectedStatus = event.detail.value;
+        this.pageNumber = 1;
         this.applyFilters();
     }
 
-    handleDateChange(event) {
-        this.selectedDate = event.target.value;
+    handleSearch(event) {
+        this.searchKey = event.target.value.toLowerCase();
         this.pageNumber = 1;
+        this.applyFilters();
     }
 
-    // ---------- Logic ----------
+    // ---------------- MAIN LOGIC ----------------
     applyFilters() {
-        const filtered = this.fullData.filter(row =>
-            row.name?.toLowerCase().includes(this.searchKey)
-        );
+        let filtered = [...this.fullData];
 
+        // 🔹 Status filter
+        if (this.selectedStatus !== 'All') {
+            filtered = filtered.filter(
+                row => row.status === this.selectedStatus
+            );
+        }
+
+        // 🔹 Search filter
+        if (this.searchKey) {
+            filtered = filtered.filter(
+                row => row.name?.toLowerCase().includes(this.searchKey)
+            );
+        }
+
+        // 🔹 Summary
         this.calculateSummary(filtered);
 
-        this.totalPages = Math.ceil(filtered.length / this.pageSize);
+        // 🔹 Pagination
+        this.totalPages = Math.ceil(filtered.length / this.pageSize) || 1;
+
         const start = (this.pageNumber - 1) * this.pageSize;
         this.attendanceList = filtered.slice(start, start + this.pageSize);
     }
 
     calculateSummary(data) {
-        this.presentCount = data.filter(r => r.status === 'Present').length;
-        this.absentCount = data.filter(r => r.status === 'Absent').length;
+    this.presentCount = data.filter(r => r.status === 'Present').length;
+    this.absentCount = data.filter(r => r.status === 'Absent').length;
+}
 
-        const total = data.length;
-        this.attendanceRate = total
-            ? Math.round((this.presentCount / total) * 100)
-            : 0;
-    }
 
     getStatusClass(status) {
         if (status === 'Present') return 'status-present';
@@ -83,41 +103,30 @@ export default class AttendanceRecord extends LightningElement {
         return 'status-late';
     }
 
-    // ---------- Pagination ----------
-    get paginationList() {
-        return Array.from({ length: this.totalPages }, (_, i) => {
-            const page = i + 1;
-            return {
-                number: page,
-                className: page === this.pageNumber ? 'page-btn active' : 'page-btn'
-            };
-        });
+    // ---------------- PAGINATION ----------------
+    get isFirstPage() {
+        return this.pageNumber === 1;
     }
 
-    handlePageClick(event) {
-        this.pageNumber = Number(event.target.dataset.page);
-        this.applyFilters();
+    get isLastPage() {
+        return this.pageNumber === this.totalPages;
     }
 
-    handleNext() {
+    get currentPage() {
+        return this.pageNumber;
+    }
+
+    nextPage() {
         if (this.pageNumber < this.totalPages) {
             this.pageNumber++;
             this.applyFilters();
         }
     }
 
-    handlePrevious() {
+    prevPage() {
         if (this.pageNumber > 1) {
             this.pageNumber--;
             this.applyFilters();
         }
-    }
-
-    get disablePrevious() {
-        return this.pageNumber === 1;
-    }
-
-    get disableNext() {
-        return this.pageNumber === this.totalPages;
     }
 }
