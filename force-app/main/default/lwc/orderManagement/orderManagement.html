@@ -2,139 +2,142 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-30-2026
+  @last modified on  : 02-03-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
     <div class="page">
 
+        <!-- HEADER -->
         <div class="header">
             <div>
                 <h1 class="title">Order Management</h1>
                 <p class="desc">Create and manage customer orders</p>
             </div>
-           <button class="primary" onclick={openNewOrderModal}>
-    + New Order
-</button>
+            <button class="primary" onclick={openNewOrderModal}>
+                + New Order
+            </button>
         </div>
 
         <div class="content">
 
-            <!-- TABLE -->
-     <div class="card table-card">
-    <h2 class="title-2">All Orders</h2>
-<!-- FILTER BAR -->
-<div class="filter-bar">
-    <!-- Search -->
-    <lightning-input
-        type="search"
-        placeholder="Search Orders"
-        value={searchKey}
-        onchange={handleSearch}>
-    </lightning-input>
+            <!-- TABLE CARD -->
+            <div class="card table-card">
 
-    <!-- Status Filter -->
-    <lightning-combobox
-        label="Status"
-        value={selectedStatus}
-        options={statusOptions}
-        onchange={handleStatusChange}>
-    </lightning-combobox>
-</div>
+                <!-- FILTER BAR -->
+                <div class="filter-bar">
+                    <lightning-input
+                        type="search"
+                        variant="label-hidden"
+                        placeholder="Search Orders"
+                        value={searchKey}
+                        class="search-input"
+                        onchange={handleSearch}>
+                    </lightning-input>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Order Number </th>
-                <th>Customer Name</th>
-                <th>Order Amount</th>
-                <th>Order Created Date</th>
-                <th>Status</th>
-                <th>Action</th>
-                
-            </tr>
-        </thead>
-        <tbody>
-            <template for:each={orders} for:item="o">
-                <tr key={o.id}>
-                    <td>#{o.number}</td>
-                    <td>{o.customer}</td>
-                    <td >₹{o.amount}</td>
-                    <td>{o.date}</td>
-                    <td>
-                        <span class={o.statusClass}>{o.status}</span>
-                    </td>
-                    <td class="right">
-                        <lightning-button-menu
-    alternative-text="Actions"
-    onselect={handleAction}
->
-<lightning-menu-item
-    label="View"
-    value={o.view}>
-</lightning-menu-item>
+                    <lightning-combobox
+                        label="Status"
+                        variant="label-hidden"
+                        value={selectedStatus}
+                        options={statusOptions}
+                        class="status-filter"
+                        onchange={handleStatusChange}>
+                    </lightning-combobox>
+                </div>
 
+                <!-- TABLE -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Customer Name</th>
+                            <th>Order Amount</th>
+                            <th>Order Created Date</th>
+                            <th>Status</th>
+                            <th class="right">Action</th>
+                        </tr>
+                    </thead>
 
-    <lightning-menu-item
-        label="Edit"
-        value={o.edit}>
-    </lightning-menu-item>
-       <lightning-menu-item value="delete" label="Delete"></lightning-menu-item>
-</lightning-button-menu>
+                    <tbody>
+                        <template for:each={orders} for:item="o">
+                            <tr key={o.id}>
+                                <td>#{o.number}</td>
+                                <td>{o.customer}</td>
+                                <td>₹{o.amount}</td>
+                                <td>{o.date}</td>
+                                <td>
+                                    <span class={o.statusClass}>{o.status}</span>
+                                </td>
+                                <td class="right">
+                                    <lightning-button-menu
+                                        alternative-text="Actions"
+                                        onselect={handleAction}>
 
+                                        <lightning-menu-item
+                                            label="View"
+                                            value={o.view}>
+                                        </lightning-menu-item>
 
-                 
-                </td>
-                </tr>
-            </template>
-        </tbody>
-    </table>
+                                        <lightning-menu-item
+                                            label="Edit"
+                                            value={o.edit}>
+                                        </lightning-menu-item>
 
-    <!-- Pagination -->
-   <div class="pagination">
-    <button class="page-btn" onclick={prevPage} disabled={isFirstPage}>
-        ‹ Prev
-    </button>
+                                        <lightning-menu-item
+                                            label="Delete"
+                                            value={o.delete}>
+                                        </lightning-menu-item>
 
-    <div class="page-info">
-        <span class="page-number">{currentPage}</span>
-        <span class="page-separator">/</span>
-        <span class="page-total">{totalPages}</span>
-    </div>
+                                    </lightning-button-menu>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
 
-    <button class="page-btn primary" onclick={nextPage} disabled={isLastPage}>
-        Next ›
-    </button>
-</div>
-</div>
+                <!-- PAGINATION -->
+                <div class="pagination">
+                    <button class="page-btn" onclick={prevPage} disabled={isFirstPage}>
+                        ‹ Prev
+                    </button>
+
+                    <div class="page-info">
+                        <span class="page-number">{currentPage}</span>
+                        <span>/</span>
+                        <span class="page-total">{totalPages}</span>
+                    </div>
+
+                    <button class="page-btn primary" onclick={nextPage} disabled={isLastPage}>
+                        Next ›
+                    </button>
+                </div>
+            </div>
 
             <!-- RIGHT PANEL -->
             <div class="side">
-
                 <div class="card">
                     <h3 class="title-3">Order Summary</h3>
+
                     <template for:each={summaryList} for:item="s">
                         <div key={s.label} class="summary-row">
                             <div class="under-icon">
                                 <div class={s.wrapperClass}>
-                                    <lightning-icon icon-name={s.iconName} size="x-small" class={s.iconClass}>
+                                    <lightning-icon
+                                        icon-name={s.iconName}
+                                        size="x-small">
                                     </lightning-icon>
                                 </div>
                                 <span class="label">{s.label}</span>
                             </div>
-
                             <b>{s.count}</b>
                         </div>
                     </template>
                 </div>
 
                 <div class="card revenue">
-                    <div>
-                        <p class="title-3">Total Revenue</p>
-                        <h2 class="amount">₹{revenue}</h2>
-                    </div>
+                    <p class="title-3">Total Revenue</p>
+                    <h2 class="amount">₹{revenue}</h2>
                 </div>
-
             </div>
 
         </div>

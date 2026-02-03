@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 01-30-2026
+  @last modified on  : 02-03-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -51,6 +51,16 @@
                       value={billing.postalCode}
                     onchange={handleAddressChange}>
                 </lightning-input>
+
+                 <div class="warehouse">
+<h3 class="section-title">Warehouse</h3>
+            <lightning-combobox
+                label="Select Warehouse"
+                value={selectedWarehouseId}
+                options={warehouseOptions}
+                onchange={handleWarehouseChange}>
+            </lightning-combobox>
+        </div>
             </div>
 
             <!-- SHIPPING CARD -->
@@ -97,15 +107,6 @@
 
         </div>
 
-        <!-- WAREHOUSE (FULL WIDTH) -->
-        <div class="warehouse">
-
-            <lightning-combobox
-                label="Select Warehouse"
-                value={selectedWarehouseId}
-                options={warehouseOptions}
-                onchange={handleWarehouseChange}>
-            </lightning-combobox>
-        </div>
+       
 
 </template>

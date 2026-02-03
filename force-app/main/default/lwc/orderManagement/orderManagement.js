@@ -1,71 +1,100 @@
-import { LightningElement, wire, track } from 'lwc';
-import getDashboardData from '@salesforce/apex/OrderManagementController.getDashboardData';
+import { LightningElement, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
+import LightningConfirm from 'lightning/confirm';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
+import getDashboardData from '@salesforce/apex/OrderManagementController.getDashboardData';
+import deleteOrder from '@salesforce/apex/OrderManagementController.deleteOrder';
 
 export default class OrderManagement extends NavigationMixin(LightningElement) {
 
-    // ---------- STATE ----------
+    // ================= STATE =================
     orders = [];
     summaryList = [];
     revenue = 0;
 
-    // ---------- PAGINATION ----------
+    // ================= PAGINATION =================
     pageSize = 10;
     currentPage = 1;
     totalOrders = 0;
 
-    // ---------- SEARCH & FILTER ----------
+    // ================= FILTERS =================
     searchKey = '';
-    selectedStatus = ''; // All 
+    selectedStatus = '';
 
-
-    @track orderProducts = [];
-@track orderTotal = 0;
-@track paymentStatus = 'Pending';
-
-    // ---------- NAVIGATION ----------
+    // ================= NAVIGATION =================
     openNewOrderModal() {
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
+            attributes: { url: '/createorder' }
+        });
+    }
+
+    // ================= ACTION HANDLER =================
+    async handleAction(event) {
+        const [action, orderId] = event.detail.value.split(':');
+
+        if (action === 'view') {
+            this.navigateToViewOrder(orderId);
+        } 
+        else if (action === 'edit') {
+            this.navigateToEditOrder(orderId);
+        } 
+        else if (action === 'delete') {
+            await this.confirmDelete(orderId);
+        }
+    }
+
+    // ================= CONFIRM DELETE =================
+    async confirmDelete(orderId) {
+        const result = await LightningConfirm.open({
+            label: 'Delete Order',
+            message: 'Are you sure you want to delete this order?',
+            theme: 'warning'
+        });
+
+        if (result) {
+            this.deleteOrderRecord(orderId);
+        }
+    }
+
+    async deleteOrderRecord(orderId) {
+        try {
+            await deleteOrder({ orderId });
+
+            this.orders = this.orders.filter(o => o.id !== orderId);
+            this.totalOrders--;
+
+            this.showToast('Success', 'Order deleted successfully', 'success');
+        } catch (error) {
+            this.showToast(
+                'Error',
+                error.body?.message || 'Failed to delete order',
+                'error'
+            );
+        }
+    }
+
+    // ================= NAVIGATIONS =================
+    navigateToEditOrder(orderId) {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
             attributes: {
-                url: '/createorder'
+                url: `/createorder?c__mode=edit&c__orderId=${orderId}`
             }
         });
     }
 
-    // 👉 NEW: Handle dropdown actions
-handleAction(event) {
-    const [action, orderId] = event.detail.value.split(':');
-
-    if (action === 'view') {
-        this.navigateToViewOrder(orderId);
+    navigateToViewOrder(orderId) {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__webPage',
+            attributes: {
+                url: `/order-view?c__orderId=${orderId}`
+            }
+        });
     }
 
-    if (action === 'edit') {
-        this.navigateToEditOrder(orderId);
-    }
-}
-
-navigateToEditOrder(orderId) {
-    this[NavigationMixin.Navigate]({
-        type: 'standard__webPage',
-        attributes: {
-            url: `/createorder?c__mode=edit&c__orderId=${orderId}`
-        }
-    });
-}
-
-
-navigateToViewOrder(orderId) {
-    this[NavigationMixin.Navigate]({
-        type: 'standard__webPage',
-        attributes: {
-            url: `/order-view?c__orderId=${orderId}`
-        }
-    });
-}
-
-    // ---------- APEX ----------
+    // ================= APEX DATA =================
     @wire(getDashboardData, {
         pageSize: '$pageSize',
         pageNumber: '$currentPage',
@@ -86,7 +115,7 @@ navigateToViewOrder(orderId) {
                 status: o.Status,
                 statusClass: this.getStatusClass(o.Status),
                 view: `view:${o.Id}`,
-                edit:  `edit:${o.Id}`,
+                edit: `edit:${o.Id}`,
                 delete: `delete:${o.Id}`
             }));
 
@@ -101,21 +130,18 @@ navigateToViewOrder(orderId) {
         }
     }
 
-  
-    // ---------- SEARCH ----------
+    // ================= SEARCH & FILTER =================
     handleSearch(event) {
         this.searchKey = event.target.value;
         this.currentPage = 1;
     }
-    
 
-    // ---------- STATUS FILTER ----------
     handleStatusChange(event) {
         this.selectedStatus = event.detail.value;
         this.currentPage = 1;
     }
 
-    // ---------- PAGINATION ----------
+    // ================= PAGINATION =================
     get totalPages() {
         return Math.ceil(this.totalOrders / this.pageSize);
     }
@@ -136,7 +162,7 @@ navigateToViewOrder(orderId) {
         if (!this.isFirstPage) this.currentPage--;
     }
 
-    // ---------- STATUS OPTIONS ----------
+    // ================= HELPERS =================
     get statusOptions() {
         return [
             { label: 'All', value: '' },
@@ -164,5 +190,11 @@ navigateToViewOrder(orderId) {
         if (status === 'Cancelled') return 'red-icon';
         if (status === 'Reject') return 'yellow-icon';
         return 'gray-icon';
+    }
+
+    showToast(title, message, variant) {
+        this.dispatchEvent(
+            new ShowToastEvent({ title, message, variant })
+        );
     }
 }

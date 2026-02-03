@@ -5,6 +5,10 @@
     margin-top: 16px;
 }
 
+.card{
+    margin: 16px;
+}
+
 .product-card {
     border: 1px solid #e5e7eb;
     border-radius: 12px;
