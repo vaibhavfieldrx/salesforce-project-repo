@@ -9,22 +9,19 @@
     color: #475569;
 }
 
+/* LEFT */
 .left {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.logo {
-    --slds-c-icon-color-foreground-default: #2563eb;
+.logo-image {
+    width: 100px;
+    margin-right: 50px;
 }
 
-.brand {
-    font-weight: 600;
-    font-size: 14px;
-    color: #0f172a;
-}
-
+/* CENTER */
 .center {
     display: flex;
     justify-content: center;
@@ -41,11 +38,34 @@
     color: #2563eb;
 }
 
+/* RIGHT */
 .right {
     white-space: nowrap;
     color: #64748b;
 }
-.logo-image{
-    margin-right: 50px;
-width: 100px;
+
+/* ========== MOBILE RESPONSIVE FIX (GRID BASED) ========== */
+@media screen and (max-width: 768px) {
+    .footer {
+        grid-template-columns: 1fr; /* 🔥 KEY FIX */
+        row-gap: 12px;
+        text-align: center;
+    }
+
+    .left,
+    .center,
+    .right {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .center {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .logo-image {
+        margin-right: 0; /* 🔥 remove desktop spacing */
+        width: 90px;
+    }
 }
