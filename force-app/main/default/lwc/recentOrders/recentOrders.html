@@ -1,0 +1,31 @@
+<template>
+    <div class="orders-card">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h2 class="title">Recent Orders</h2>
+                <p class="subtitle">Latest order activities</p>
+            </div>
+            <a class="view-all">View All</a>
+        </div>
+
+        <!-- Order List -->
+        <div class="list">
+            <template for:each={orders} for:item="order">
+                <div class="row" key={order.id}>
+                    <div class="left">
+                        <p class="order-id">{order.orderId}</p>
+                        <p class="company">{order.company}</p>
+                    </div>
+                    <div class="right">
+                        <p class="amount">{order.amount}</p>
+                        <span class={order.statusClass}>
+    {order.status}
+</span>
+
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>
