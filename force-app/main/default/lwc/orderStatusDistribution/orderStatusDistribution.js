@@ -1,50 +1,79 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 import { loadScript } from 'lightning/platformResourceLoader';
 import ChartJS from '@salesforce/resourceUrl/ChartJS';
+import getOrderStatusData from '@salesforce/apex/OrderStatusChartController.getOrderStatusData';
 
 export default class OrderStatusDistribution extends LightningElement {
     chart;
+    chartJsLoaded = false;
+    dataLoaded = false;
+    wiredResult;
+
+    @wire(getOrderStatusData)
+    wiredOrderData(result) {
+        this.wiredResult = result;
+        if (result.data) {
+            this.dataLoaded = true;
+            this.renderChart();
+        }
+    }
 
     renderedCallback() {
-        if (this.chart) return;
+        if (this.chartJsLoaded) return;
+        this.chartJsLoaded = true;
 
         loadScript(this, ChartJS)
             .then(() => {
-                this.initializeChart();
+                this.renderChart();
             })
             .catch(error => {
-                console.error(error);
+                console.error('ChartJS load error', error);
             });
     }
 
-    initializeChart() {
-        const ctx = this.template.querySelector('canvas').getContext('2d');
+    renderChart() {
+        if (!this.chartJsLoaded || !this.dataLoaded) return;
+
+        const canvas = this.template.querySelector('[data-id="orderChart"]');
+        if (!canvas) return;
+
+        if (this.chart) {
+            this.chart.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
 
         this.chart = new window.Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Pending', 'Processing', 'Shipped', 'Delivered'],
+                labels: this.wiredResult.data.map(item => item.label),
                 datasets: [{
-                    data: [32, 36, 14, 18],
+                    data: this.wiredResult.data.map(item => item.value),
                     backgroundColor: [
-                        '#2563EB', // Pending - Blue
-                        '#2A9D8F', // Processing - Green
-                        '#F59E0B', // Shipped - Orange
-                        '#A855F7'  // Delivered - Purple
+                        '#2563eb',
+                        '#2dd4bf',
+                        '#f59e0b',
+                        '#a855f7'
                     ],
-                    borderWidth: 4,
+                    borderWidth: 3,
                     borderColor: '#ffffff'
                 }]
             },
             options: {
                 responsive: true,
-                cutout: '65%',
+                maintainAspectRatio: false,
+                cutout: '70%',
                 plugins: {
                     legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        enabled: true
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 20,
+                            font: {
+                                size: 13
+                            }
+                        }
                     }
                 }
             }

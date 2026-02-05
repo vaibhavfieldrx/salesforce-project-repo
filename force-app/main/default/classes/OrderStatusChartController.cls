@@ -7,6 +7,7 @@ public with sharing class OrderStatusChartController {
         for (AggregateResult ar : [
             SELECT Status__c status, COUNT(Id) total
             FROM Order__c
+            WHERE Status__c != null
             GROUP BY Status__c
         ]) {
             result.add(new StatusData(

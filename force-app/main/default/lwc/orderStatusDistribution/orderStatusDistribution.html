@@ -1,24 +1,7 @@
 <template>
-    <div class="card">
-        <h2 class="title">Order Status Distribution</h2>
-
-        <div class="chart-wrapper">
-            <canvas class="donut"></canvas>
+    <lightning-card title="Order Status Distribution" class="order-card">
+        <div class="chart-container">
+            <canvas data-id="orderChart"></canvas>
         </div>
-
-        <div class="legend">
-            <div class="item">
-                <span class="dot pending"></span> Pending
-            </div>
-            <div class="item">
-                <span class="dot processing"></span> Processing
-            </div>
-            <div class="item">
-                <span class="dot shipped"></span> Shipped
-            </div>
-            <div class="item">
-                <span class="dot delivered"></span> Delivered
-            </div>
-        </div>
-    </div>
+    </lightning-card>
 </template>
