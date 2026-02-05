@@ -1,0 +1,35 @@
+<template>
+    <div class="attendance-card">
+        <h2>My Attendance</h2>
+        <p class="subtitle">This week's login record</p>
+
+<template if:true={attendanceRecords.length}>
+                <template for:each={attendanceRecords} for:item="record">
+                <div class="attendance-row" key={record.id}>
+                    <!-- Status Icon -->
+                    <div class="status-icon">
+                        <template if:true={record.isActive}>
+                            <div class="active-circle"></div>
+                        </template>
+                        <template if:false={record.isActive}>
+                            <div class="check-circle">✔</div>
+                        </template>
+                    </div>
+
+                    <!-- Day & Time -->
+                    <div class="details">
+                        <div class="day">{record.day}</div>
+                        <div class="time">{record.time}</div>
+                    </div>
+
+                    <!-- Status (Hours or Active) -->
+                    <div class="status-label">{record.status}</div>
+                </div>
+            </template>
+        </template>
+
+        <template if:true={error}>
+            <p class="error">Error loading attendance data</p>
+        </template>
+    </div>
+</template>

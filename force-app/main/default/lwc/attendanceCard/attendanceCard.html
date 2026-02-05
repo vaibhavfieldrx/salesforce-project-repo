@@ -1,0 +1,26 @@
+<template>
+    <div class="card">
+        <h2 class="title">My Attendance</h2>
+        <p class="subtitle">This week's login record</p>
+
+        <template for:each={attendanceList} for:item="item">
+            <div key={item.id} class="row">
+                <!-- Left icon -->
+                <div class="icon">
+                    ✓
+                </div>
+
+                <!-- Center content -->
+                <div class="content">
+                    <div class="date">{item.date}</div>
+                    <div class="time">{item.time}</div>
+                </div>
+
+                <!-- Right hours / status -->
+                <div class={item.statusClass}>
+                    {item.hours}
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

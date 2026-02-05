@@ -1,0 +1,34 @@
+.order-card {
+    --slds-c-card-radius-border: 10px;
+}
+
+/* Subtitle */
+.subtitle {
+    margin: -6px 0 10px 20px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Chart */
+.chart-container {
+    position: relative;
+    height: 300px;
+    padding: 0 20px 20px;
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 260px;
+    }
+}
+.filter-box{
+    padding: 20px;
+}
+/* Mobile */
+@media (max-width: 480px) {
+    .chart-container {
+        height: 220px;
+        padding: 10px;
+    }
+}
