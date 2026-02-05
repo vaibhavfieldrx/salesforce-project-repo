@@ -2,7 +2,7 @@
  * @description       : Order Management Controller
  * @author            :
  * @group             :
- * @last modified on  : 02-03-2026
+ * @last modified on  : 02-04-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class OrderManagementController {
@@ -73,37 +73,66 @@ public with sharing class OrderManagementController {
         };
     }
 
+
+@AuraEnabled
+public static String submitOrderForApproval(Id orderId, String comment) {
+    if (orderId == null) throw new AuraHandledException('Order Id is required');
+    if (String.isBlank(comment)) throw new AuraHandledException('Comment is required.');
+
+    try {
+        Approval.ProcessSubmitRequest req = new Approval.ProcessSubmitRequest();
+        req.setObjectId(orderId);
+        req.setComments(comment);
+
+        // Initial approver is determined by your Approval Process
+        // Salesforce will follow your defined steps automatically
+        Approval.ProcessResult result = Approval.process(req);
+
+        if (!result.isSuccess()) {
+            throw new AuraHandledException('Approval submission failed: ' + result.getErrors());
+        }
+        return 'Order submitted for approval successfully';
+    } catch(Exception ex) {
+        throw new AuraHandledException('Error: ' + ex.getMessage());
+    }
+}
+
+
+
     /* =====================================================
        ORDER DETAILS
     ===================================================== */
     @AuraEnabled(cacheable=true)
-    public static Map<String, Object> getOrderDetails(Id orderId) {
-        Order ord = [
-            SELECT Id, OrderNumber, EffectiveDate, TotalAmount,
-                   AccountId, Account.Name, Account.Phone,
-                   (SELECT Id, Quantity, UnitPrice, TotalPrice,
-                           Product2.Name, Product2.StockKeepingUnit
-                    FROM OrderItems)
-            FROM Order
-            WHERE Id = :orderId
+public static Map<String, Object> getOrderDetails(Id orderId) {
+    Order ord = [
+        SELECT Id, OrderNumber, EffectiveDate, TotalAmount, ShippingAddress, Status,
+               AccountId, Account.Name, Account.Phone, Account.Email__c,
+               (SELECT Id, Quantity, UnitPrice, TotalPrice,
+                       Product2.Name, Product2.StockKeepingUnit
+                FROM OrderItems)
+        FROM Order
+        WHERE Id = :orderId
+        LIMIT 1
+    ];
+
+    Contact con;
+    if (ord.AccountId != null) {
+        List<Contact> cons = [
+            SELECT Email, Phone
+            FROM Contact
+            WHERE AccountId = :ord.AccountId
             LIMIT 1
         ];
-
-        Contact con;
-        if (ord.AccountId != null) {
-            con = [
-                SELECT Email, Phone
-                FROM Contact
-                WHERE AccountId = :ord.AccountId
-                LIMIT 1
-            ];
+        if (!cons.isEmpty()) {
+            con = cons[0];
         }
-
-        return new Map<String, Object>{
-            'order' => ord,
-            'contact' => con
-        };
     }
+
+    return new Map<String, Object>{
+        'order' => ord,
+        'contact' => con
+    };
+}
 
     /* =====================================================
        DELETE ORDER  ✅ FIXED

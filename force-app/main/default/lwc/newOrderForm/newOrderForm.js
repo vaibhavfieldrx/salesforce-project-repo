@@ -280,7 +280,6 @@ export default class NewOrderForm extends NavigationMixin(LightningElement) {
 
             this.customerId = data.accountId;
             this.selectedCustomer = { accountId: data.accountId };
-            console.log("dataaaaa", data)
             this.orderAddressData = {
                 billingAddress: data.billingAddress,
                 shippingAddress: data.shippingAddress,
