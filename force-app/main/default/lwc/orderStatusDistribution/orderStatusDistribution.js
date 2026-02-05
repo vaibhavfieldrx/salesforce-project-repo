@@ -47,17 +47,33 @@ export default class OrderStatusDistribution extends LightningElement {
             type: 'doughnut',
             data: {
                 labels: this.wiredResult.data.map(item => item.label),
-                datasets: [{
-                    data: this.wiredResult.data.map(item => item.value),
-                    backgroundColor: [
-                        '#2563eb',
-                        '#2dd4bf',
-                        '#f59e0b',
-                        '#a855f7'
-                    ],
-                    borderWidth: 3,
-                    borderColor: '#ffffff'
-                }]
+               datasets: [{
+    data: this.wiredResult.data.map(item => item.value),
+
+    backgroundColor: this.wiredResult.data.map(item => {
+
+        if (item.label === 'Approved') {
+            return '#2dd4bf';
+        }
+
+        if (item.label === 'Pending') {
+            return '#f59e0b';
+        }
+
+        if (item.label === 'Rejected') {
+            return '#ef4444';
+        }
+
+        if (item.label === 'Cancelled') {
+            return '#a855f7';
+        }
+
+        return '#94a3b8';
+    }),
+
+    borderWidth: 3,
+    borderColor: '#ffffff'
+}]
             },
             options: {
                 responsive: true,

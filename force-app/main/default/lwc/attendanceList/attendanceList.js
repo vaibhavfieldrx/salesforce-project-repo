@@ -1,80 +1,137 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, wire } from 'lwc';
 import getFEAttendance from '@salesforce/apex/AttendanceController.getFEAttendance';
 
 export default class AttendanceList extends LightningElement {
-    @track attendanceRecords = [];
-    @track error;
 
+    attendanceRecords = [];
+    error;
+
+    // Wire Apex (keeping selectedDate as in your Apex)
     @wire(getFEAttendance, { selectedDate: null })
-wiredAttendance({ error, data }) {
-    if (data) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+    wiredAttendance({ error, data }) {
 
-        const sevenDaysAgo = new Date(today);
-        sevenDaysAgo.setDate(today.getDate() - 6); // last 7 days incl today
+        console.log('Attendance Data:', data);
 
-        this.attendanceRecords = data
-            .filter(rec => {
-                if (!rec.checkIn) return false;
+        if (data) {
 
-                const checkInDate = new Date(rec.checkIn);
-                checkInDate.setHours(0, 0, 0, 0);
+            // ---------- THIS WEEK FILTER ----------
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-                return checkInDate >= sevenDaysAgo && checkInDate <= today;
-            })
-           .map((rec, index) => {
-    let statusText = 'Absent';
+            // Last 7 days (including today)
+           // ---------- THIS WEEK (MON-SUN) ----------
 
-if (rec.checkIn && rec.checkOut) {
-    const checkIn = new Date(rec.checkIn);
-    const checkOut = new Date(rec.checkOut);
+// Monday
+const weekStart = new Date(today);
+weekStart.setDate(today.getDate() - today.getDay() + 1);
+weekStart.setHours(0, 0, 0, 0);
 
-    if (checkOut >= checkIn) {
-        const diffMs = checkOut - checkIn;
-        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+// Sunday
+const weekEnd = new Date(weekStart);
+weekEnd.setDate(weekStart.getDate() + 6);
+weekEnd.setHours(23, 59, 59, 999);
+// ---------------------------------------
 
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
+            // -------------------------------------
 
-        statusText = `${hours}h ${minutes}m`;
-    } else {
-        // ❗ invalid or wrong time order
-        statusText = '--';
+            this.attendanceRecords = data
+
+                // ✅ FILTER ONLY THIS WEEK
+                .filter(rec => {
+
+                    if (!rec.checkIn) return false;
+
+                    const checkInDate = new Date(rec.checkIn);
+                    checkInDate.setHours(0, 0, 0, 0);
+
+                    return (
+    checkInDate >= weekStart &&
+    checkInDate <= weekEnd
+);
+                })
+
+                // ---------- YOUR EXISTING LOGIC ----------
+                .map((rec, index) => {
+
+                    let statusText = rec.status || 'Absent';
+                    let isActive = false;
+
+                    // If CheckIn + CheckOut
+                    if (rec.checkIn && rec.checkOut) {
+
+                        const checkIn = new Date(rec.checkIn);
+                        const checkOut = new Date(rec.checkOut);
+
+                        if (checkOut >= checkIn) {
+
+                            const diffMs = checkOut - checkIn;
+                            const totalMinutes = Math.floor(diffMs / 60000);
+
+                            const hours = Math.floor(totalMinutes / 60);
+                            const minutes = totalMinutes % 60;
+
+                            statusText = `${hours}h ${minutes}m`;
+                        } else {
+
+                            // Invalid time
+                            statusText = '--';
+                        }
+                    }
+
+                    // Only CheckIn (Active)
+                    else if (rec.checkIn && !rec.checkOut) {
+
+                        statusText = 'Active';
+                        isActive = true;
+                    }
+
+                    return {
+
+                        // Unique key
+                        id: rec.userId + index,
+
+                        // Date
+                        day: rec.checkIn
+                            ? new Date(rec.checkIn).toLocaleDateString('en-IN', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric'
+                              })
+                            : 'N/A',
+
+                        // Time
+                        time: rec.checkIn
+                            ? this.formatTime(rec.checkIn, rec.checkOut)
+                            : '--',
+
+                        // Status
+                        status: statusText,
+
+                        // For Icon
+                        isActive: isActive
+                    };
+                });
+
+            this.error = undefined;
+
+        } else if (error) {
+
+            console.error('Error:', error);
+
+            this.error = error;
+            this.attendanceRecords = [];
+        }
     }
-} else if (rec.checkIn && !rec.checkOut) {
-    statusText = 'Active';
-}
 
+    // ---------- Helper: Format Time ----------
+    formatTime(checkIn, checkOut) {
 
+        const format = (time) =>
+            new Date(time).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
-    return {
-        id: rec.userId + index,
-        day: rec.checkIn ? new Date(rec.checkIn).toDateString() : 'N/A',
-        time: rec.checkIn
-            ? `${new Date(rec.checkIn).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit'
-              })} - ${
-                  rec.checkOut
-                      ? new Date(rec.checkOut).toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        })
-                      : '--'
-              }`
-            : '--',
-        status: statusText,
-        statusClass: statusText === 'Active' ? 'active' : 'present'
-    };
-});
-
-
-        this.error = undefined;
-    } else if (error) {
-        this.error = error;
-        this.attendanceRecords = [];
+        return `${format(checkIn)} - ${checkOut ? format(checkOut) : '--'}`;
     }
-}
-
 }

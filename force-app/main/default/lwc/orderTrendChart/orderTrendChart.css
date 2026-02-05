@@ -22,7 +22,9 @@
         height: 260px;
     }
 }
-
+.filter-box{
+    padding: 20px;
+}
 /* Mobile */
 @media (max-width: 480px) {
     .chart-container {

@@ -1,14 +1,19 @@
 public with sharing class OrderTrendChartController {
 
     @AuraEnabled(cacheable=true)
-    public static List<MonthlyData> getMonthlyOrderTrend() {
+    public static List<MonthlyData> getMonthlyOrderTrend(Integer year) {
+
+        // ✅ SAFETY: Default current year
+        if (year == null) {
+            year = Date.today().year();
+        }
 
         // 1️⃣ Query existing data
         List<AggregateResult> data = [
             SELECT CALENDAR_MONTH(CreatedDate) month,
                    COUNT(Id) total
             FROM Order__c
-            WHERE CreatedDate = LAST_N_MONTHS:12
+            WHERE CALENDAR_YEAR(CreatedDate) = :year
             GROUP BY CALENDAR_MONTH(CreatedDate)
         ];
 

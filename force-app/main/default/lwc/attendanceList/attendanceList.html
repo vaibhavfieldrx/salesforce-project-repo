@@ -3,8 +3,8 @@
         <h2>My Attendance</h2>
         <p class="subtitle">This week's login record</p>
 
-        <template if:true={attendanceRecords}>
-            <template for:each={attendanceRecords} for:item="record">
+<template if:true={attendanceRecords.length}>
+                <template for:each={attendanceRecords} for:item="record">
                 <div class="attendance-row" key={record.id}>
                     <!-- Status Icon -->
                     <div class="status-icon">
