@@ -1,29 +1,29 @@
 <!--
-  @description       : 
+  @description       :
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
+  @group             :
   @last modified on  : 02-04-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
     <template if:true={dataLoaded}>
         <div class="page">
-
+ 
             <!-- BACK -->
             <div class="back">
                 <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
                 <span>Back to Orders</span>
             </div>
-
+ 
             <!-- HEADER -->
             <div class="header">
             <div>
                 <h1 class="title">Order #{orderNumber}</h1>
                 <p class="sub">Order placed on {orderDate}</p>
             </div>
-
+ 
             <span class="status {statusClass}">{orderStatus}</span>
-
+ 
             <!-- SUBMIT APPROVAL BUTTON -->
             <template if:true={canSubmitApproval}>
     <lightning-button
@@ -32,15 +32,15 @@
         onclick={openApprovalModal}>
     </lightning-button>
 </template>
-
-
+ 
+ 
         </div>
-
+ 
             <div class="layout">
-
+ 
                 <!-- LEFT COLUMN -->
                 <div>
-
+ 
                     <!-- ORDER ITEMS -->
                     <div class="card">
                         <div class="card-header">
@@ -48,17 +48,17 @@
                             <h3>Order Items</h3>
                         </div>
                         <hr>
-
+ 
                         <template if:true={products}>
                             <template for:each={products} for:item="item">
                                 <div key={item.id} class="item">
                                     <lightning-icon icon-name="standard:product" size="medium"></lightning-icon>
-
+ 
                                     <div class="item-info">
                                         <h4>{item.name}</h4>
                                         <span class="muted">SKU: {item.sku}</span>
                                     </div>
-
+ 
                                     <div class="item-price">
                                         <h4>₹{item.total}</h4>
                                         <span class="muted">{item.qty} × ₹{item.price}</span>
@@ -66,26 +66,26 @@
                                 </div>
                             </template>
                         </template>
-
+ 
                         <template if:false={products}>
                             <p>No items in this order.</p>
                         </template>
-
+ 
                         <div class="divider"></div>
-
+ 
                         <div class="total">
                             <span>Total</span>
                             <b class="primary">₹{grandTotal}</b>
                         </div>
                     </div>
-
+ 
                     <!-- TIMELINE -->
                     <div class="card">
                         <div class="card-header">
                             <lightning-icon icon-name="utility:event" size="small"></lightning-icon>
                             <h3>Order Timeline</h3>
                         </div>
-
+ 
                         <ul class="timeline">
                             <template for:each={timeline} for:item="step">
                                 <li key={step.label} class={step.color}>
@@ -98,19 +98,19 @@
                             </template>
                         </ul>
                     </div>
-
+ 
                 </div>
-
+ 
                 <!-- RIGHT COLUMN -->
                 <div>
-
+ 
                     <!-- CUSTOMER INFO -->
                     <div class="card">
                         <div class="card-header">
                             <lightning-icon icon-name="standard:account" size="small"></lightning-icon>
                             <h3>Customer Information</h3>
                         </div>
-
+ 
                         <div class="customer">
                             <lightning-icon icon-name="standard:user" size="medium"></lightning-icon>
                             <div class="display-g">
@@ -118,7 +118,7 @@
                                 <span class="badge">Active</span>
                             </div>
                         </div>
-
+ 
                         <p class="info">
                             <lightning-icon icon-name="utility:email" size="x-small"></lightning-icon>
                             {email}
@@ -128,14 +128,14 @@
                             {phone}
                         </p>
                     </div>
-
+ 
                     <!-- PAYMENT SUMMARY -->
                     <div class="card">
                         <div class="card-header">
                             <lightning-icon icon-name="utility:money" size="small"></lightning-icon>
                             <h3>Payment Summary</h3>
                         </div>
-
+ 
                         <div class="row">
                             <span>Subtotal</span><span>₹{totalAmount}</span>
                         </div>
@@ -145,26 +145,26 @@
                         <div class="row">
                             <span>Tax</span><span>₹{tax}</span>
                         </div>
-
+ 
                         <div class="divider"></div>
-
+ 
                         <div class="row total">
                             <b>Total</b>
                             <b class="primary">₹{grandTotal}</b>
                         </div>
                     </div>
-
+ 
                 </div>
-
+ 
             </div>
         </div>
     </template>
-
+ 
     <template if:false={dataLoaded}>
         <p>Loading order details...</p>
     </template>
-
-    
+ 
+   
 <!-- APPROVAL MODAL -->
 <template if:true={isApprovalModalOpen}>
     <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
@@ -173,7 +173,7 @@
             <header class="slds-modal__header">
                 <h2 class="slds-text-heading_medium">Submit Order for Approval</h2>
             </header>
-
+ 
             <!-- BODY -->
             <div class="slds-modal__content slds-p-around_medium">
                 <lightning-textarea
@@ -183,7 +183,7 @@
                     onchange={handleCommentChange}>
                 </lightning-textarea>
             </div>
-
+ 
             <!-- FOOTER -->
             <footer class="slds-modal__footer">
                 <lightning-button variant="neutral" label="Cancel" onclick={closeApprovalModal}></lightning-button>
@@ -191,8 +191,7 @@
             </footer>
         </div>
     </section>
-
+ 
     <div class="slds-backdrop slds-backdrop_open"></div>
 </template>
 </template>
-
