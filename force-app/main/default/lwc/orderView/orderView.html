@@ -2,7 +2,7 @@
     <div class="page">
 
         <!-- BACK -->
-        <div class="back">
+        <div class="back" onclick={handleBack}>
             <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
             <span>Back to Orders</span>
         </div>
@@ -10,16 +10,16 @@
         <!-- HEADER -->
         <div class="header">
             <div>
-                <h1 class="title">Order #0001</h1>
-                <p class="sub">Order placed on 2024-01-15</p>
+                <h1 class="title">Order #{orderNumber}</h1>
+                <p class="sub">Order placed on {formattedOrderDate}</p>
             </div>
 
-            <span class="status delivered">Delivered</span>
+            <span class={statusClass}>{status}</span>
         </div>
 
         <div class="layout">
 
-            <!-- LEFT -->
+            <!-- LEFT COLUMN -->
             <div>
 
                 <!-- ORDER ITEMS -->
@@ -28,77 +28,87 @@
                         <lightning-icon icon-name="standard:orders" size="small"></lightning-icon>
                         <h3>Order Items</h3>
                     </div>
-<hr>
-                    <div class="item">
-                        <lightning-icon icon-name="standard:product" size="medium"></lightning-icon>
+                    <hr />
 
-                        <div class="item-info">
-                            <h4>Industrial Widget A</h4>
-                            <span class="muted">SKU: IW-001</span>
-                        </div>
+                    <template if:true={hasProducts}>
+                        <template for:each={products} for:item="item">
+                            <div key={item.id} class="item">
+                                <lightning-icon icon-name="standard:product" size="medium"></lightning-icon>
 
-                        <div class="item-price">
-                            <h4>$1249.50</h4>
-                            <span class="muted">50 × $24.99</span>
-                        </div>
-                    </div>
+                                <div class="item-info">
+                                    <h4>{item.name}</h4>
+                                    <span class="muted">SKU: {item.sku}</span>
+                                </div>
 
-                    <div class="divider"></div>
+                                <div class="item-price">
+                                    <h4>₹{item.price}</h4>
+                                    <span class="muted">{item.qty} × ₹{item.price}</span>
+                                </div>
+                            </div>
+                            <!-- <div class="divider"></div> -->
+                        </template>
+                    </template>
 
+                    <template if:false={hasProducts}>
+                        <p>No items in this order.</p>
+                    </template>
+<hr />
                     <div class="total">
                         <span>Total</span>
-                        <b class="primary">$1249.50</b>
+                        <b class="primary">₹{totalAmount}</b>
                     </div>
                 </div>
 
-                <!-- TIMELINE -->
-                <div class="card">
-                    <div class="card-header">
-                        <lightning-icon icon-name="utility:event" size="small"></lightning-icon>
-                        <h3>Order Timeline</h3>
+                <!-- ORDER TIMELINE -->
+                <template if:true={status}>
+                    <div class="card">
+                        <div class="card-header">
+                            <lightning-icon icon-name="utility:event" size="small"></lightning-icon>
+                            <h3>Order Timeline</h3>
+                        </div>
+
+                        <ul class="timeline">
+                            <li class={timelineClasses.orderPlaced}>
+                                <span class="dot"></span>
+                                <div class="display-g">
+                                    <h4>Order Placed</h4>
+                                    <span class="muted">{formattedOrderDate}</span>
+                                </div>
+                            </li>
+
+                            <li class={timelineClasses.processing}>
+                                <span class="dot"></span>
+                                <div class="display-g">
+                                    <h4>Processing Started</h4>
+                                    <span class="muted">Order is being prepared</span>
+                                </div>
+                            </li>
+
+                            <li class={timelineClasses.shipped}>
+                                <span class="dot"></span>
+                                <div class="display-g">
+                                    <h4>Shipped</h4>
+                                    <span class="muted">Package is on its way</span>
+                                </div>
+                            </li>
+
+                            <li class={timelineClasses.delivered}>
+                                <span class="dot"></span>
+                                <div class="display-g">
+                                    <h4>Delivered</h4>
+                                    <span class="muted">Order completed successfully</span>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
-
-                    <ul class="timeline">
-                        <li class="blue">
-                            <span class="dot"></span>
-                            <div class="display-g">
-                                <h4>Order Placed</h4>
-                                <span class="muted">2024-01-15</span>
-                            </div>
-                        </li>
-
-                        <li class="orange">
-                            <span class="dot"></span>
-                            <div class="display-g">
-                                <h4>Processing Started</h4>
-                                <span class="muted">Order is being prepared</span>
-                            </div>
-                        </li>
-
-                        <li class="blue">
-                            <span class="dot"></span>
-                            <div class="display-g">
-                                <h4>Shipped</h4>
-                                <span class="muted">Package is on its way</span>
-                            </div>
-                        </li>
-
-                        <li class="green">
-                            <span class="dot"></span>
-                            <div class="display-g">
-                                <h4>Delivered</h4>
-                                <span class="muted">Order completed successfully</span>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+                </template>
 
             </div>
 
-            <!-- RIGHT -->
+            <!-- RIGHT COLUMN -->
             <div>
 
-                <!-- CUSTOMER INFO -->
+                <!-- CUSTOMER INFORMATION -->
                 <div class="card">
                     <div class="card-header">
                         <lightning-icon icon-name="standard:account" size="small"></lightning-icon>
@@ -108,37 +118,22 @@
                     <div class="customer">
                         <lightning-icon icon-name="standard:user" size="medium"></lightning-icon>
                         <div class="display-g">
-                            <h4>Acme Corp</h4>
+                            <h4>{customerName}</h4>
                             <span class="badge">Active</span>
                         </div>
                     </div>
 
                     <p class="info">
                         <lightning-icon icon-name="utility:email" size="x-small"></lightning-icon>
-                        contact@acme.com
+                        {email}
                     </p>
                     <p class="info">
                         <lightning-icon icon-name="utility:call" size="x-small"></lightning-icon>
-                        +1 555-0101
-                    </p>
-                    <p class="info">
-                        <lightning-icon icon-name="utility:location" size="x-small"></lightning-icon>
-                        123 Business Ave, New York
+                        {phone}
                     </p>
                 </div>
 
-                <!-- TERRITORY -->
-                <div class="card">
-                    <div class="card-header">
-                        <lightning-icon icon-name="utility:world" size="small"></lightning-icon>
-                        <h3>Territory</h3>
-                    </div>
-
-                    <h4>North Region</h4>
-                    <p class="muted">Manager: John Smith</p>
-                </div>
-
-                <!-- PAYMENT -->
+                <!-- PAYMENT SUMMARY -->
                 <div class="card">
                     <div class="card-header">
                         <lightning-icon icon-name="utility:money" size="small"></lightning-icon>
@@ -146,20 +141,20 @@
                     </div>
 
                     <div class="row">
-                        <span>Subtotal</span><span>$1249.50</span>
+                        <span>Subtotal</span><span>₹{totalAmount}</span>
                     </div>
                     <div class="row">
-                        <span>Shipping</span><span>$0.00</span>
+                        <span>Shipping</span><span>0.00</span>
                     </div>
                     <div class="row">
-                        <span>Tax</span><span>$0.00</span>
+                        <span>Tax</span><span>0.00</span>
                     </div>
 
                     <div class="divider"></div>
 
                     <div class="row total">
                         <b>Total</b>
-                        <b class="primary">$1249.50</b>
+                        <b class="primary">₹{totalAmount}</b>
                     </div>
                 </div>
 
