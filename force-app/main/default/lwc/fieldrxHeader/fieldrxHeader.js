@@ -70,9 +70,7 @@ wiredDepartment(response) {
              this.filteredTabs = [...this.tabsData];
         }
         else {
-            this.filteredTabs = [
-                { label: 'Home', icon: 'utility:home', url: '/dashboard' }
-            ];
+            this.filteredTabs = [...this.tabsData];
         }
     }
 
