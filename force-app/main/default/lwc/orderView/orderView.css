@@ -21,8 +21,8 @@
 }
 
 .title {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .sub {
@@ -59,7 +59,7 @@
     display: flex;
     gap: 8px;
     align-items: center;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 .item {
