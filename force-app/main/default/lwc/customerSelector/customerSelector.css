@@ -13,7 +13,9 @@
     padding: 12px;
     margin-top: 16px;
 }
-
+.slds-grid{
+    padding: 0 24px;
+}
 .avatar {
     background: #e8f0fe;
     border-radius: 50%;

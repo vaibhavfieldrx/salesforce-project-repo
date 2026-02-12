@@ -1,0 +1,59 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 02-11-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <lightning-card title="Approval Inbox">
+        <template if:true={orders.length}>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={orders} for:item="o">
+                        <tr key={o.orderId}>
+                            <td>{o.orderNumber}</td>
+                            <td>{o.accountName}</td>
+                            <td>{o.status}</td>
+                            <td>
+                                 <!-- <lightning-button
+        key={o.orderId}
+        label="Approve"
+        variant="brand"
+        data-workitemid={o.workItemId}
+        onclick={approve}>
+    </lightning-button> -->
+                                 <lightning-button
+                                    label="Approve"
+                                    variant="brand"
+                                    class="slds-m-left_small"
+                                    data-workitemid={o.workItemId}
+                                    onclick={approve}>
+                                </lightning-button>
+                                <lightning-button
+                                    label="Reject"
+                                    variant="destructive"
+                                    class="slds-m-left_small"
+                                    onclick={reject}
+                                    data-id={o.Id}>
+                                </lightning-button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </template>
+
+        <template if:false={orders.length}>
+            <p class="slds-p-around_medium">No pending approvals</p>
+        </template>
+    </lightning-card>
+</template>

@@ -61,18 +61,25 @@ wiredDepartment(response) {
     // FILTER TABS
     setTabsByDepartment() {
 
-        if (this.department === 'SM') {
-            this.filteredTabs = this.tabsData.filter(tab =>
-                ['Home', 'Customers', 'Order', 'Attendance'].includes(tab.label)
-            );
-        }   
-        else if (this.department === 'FE') {
-             this.filteredTabs = [...this.tabsData];
-        }
-        else {
-            this.filteredTabs = [...this.tabsData];
-        }
+    // SM → ALL TABS
+    if (this.department === 'SM') {
+        this.filteredTabs = [...this.tabsData];
+    } 
+    
+    // FE → ALL TABS
+    else if (this.department === 'FE') {
+        this.filteredTabs = [...this.tabsData];
+    } 
+    
+    // OTHERS → ONLY HOME
+    else {
+        this.filteredTabs = this.tabsData.filter(tab => tab.label === 'Home');
     }
+
+    // Detect active tab
+    this.detectActiveTab();
+}
+
 
     get navClass() {
         return this.isMenuOpen ? 'nav open' : 'nav';

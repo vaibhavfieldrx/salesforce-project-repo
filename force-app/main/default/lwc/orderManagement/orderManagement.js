@@ -1,10 +1,11 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import LightningConfirm from 'lightning/confirm';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 import getDashboardData from '@salesforce/apex/OrderManagementController.getDashboardData';
 import deleteOrder from '@salesforce/apex/OrderManagementController.deleteOrder';
+import getUserDepartment from '@salesforce/apex/UserContactController.getUserDepartment';
 
 export default class OrderManagement extends NavigationMixin(LightningElement) {
 
@@ -23,6 +24,24 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
     selectedStatus = '';
 
     // ================= NAVIGATION =================
+
+
+    @track userDepartment;
+
+@wire(getUserDepartment)
+wiredUserDepartment({ data, error }) {
+    if (data) {
+        this.userDepartment = data;
+    } else if (error) {
+        console.error(error);
+    }
+}
+
+
+get showApprovalInbox() {
+    return this.userDepartment === 'SM' || this.userDepartment === 'Admin';
+}
+
     openNewOrderModal() {
         this[NavigationMixin.Navigate]({
             type: 'standard__webPage',
@@ -114,6 +133,7 @@ export default class OrderManagement extends NavigationMixin(LightningElement) {
                 amount: o.TotalAmount,
                 status: o.Status,
                 statusClass: this.getStatusClass(o.Status),
+                isDraft: o.Status === 'Draft',
                 view: `view:${o.Id}`,
                 edit: `edit:${o.Id}`,
                 delete: `delete:${o.Id}`

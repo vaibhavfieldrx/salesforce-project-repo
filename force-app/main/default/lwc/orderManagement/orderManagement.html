@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 02-03-2026
+  @last modified on  : 02-10-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -78,16 +78,17 @@
                                             value={o.view}>
                                         </lightning-menu-item>
 
-                                        <lightning-menu-item
-                                            label="Edit"
-                                            value={o.edit}>
-                                        </lightning-menu-item>
+                                        <template if:true={o.isDraft}>
+            <lightning-menu-item
+                label="Edit"
+                value={o.edit}>
+            </lightning-menu-item>
 
-                                        <lightning-menu-item
-                                            label="Delete"
-                                            value={o.delete}>
-                                        </lightning-menu-item>
-
+            <lightning-menu-item
+                label="Delete"
+                value={o.delete}>
+            </lightning-menu-item>
+        </template>
                                     </lightning-button-menu>
                                 </td>
                             </tr>
@@ -134,6 +135,12 @@
                     </template>
                 </div>
 
+               <template if:true={showApprovalInbox}>
+    <div class="card slds-m-top_medium">
+        <h3 class="title-3">Pending Approvals</h3>
+        <c-approval-inbox></c-approval-inbox>
+    </div>
+</template>
                 <div class="card revenue">
                     <p class="title-3">Total Revenue</p>
                     <h2 class="amount">₹{revenue}</h2>

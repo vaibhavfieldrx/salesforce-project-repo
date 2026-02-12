@@ -2,7 +2,7 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 01-29-2026
+ * @last modified on  : 02-10-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class AttendanceController {
@@ -28,7 +28,7 @@ public with sharing class AttendanceController {
                    Check_out_Time__c,
                    Status__c
             FROM Attendance__c
-            WHERE User__c = :loggedInUserId
+            // WHERE User__c = :loggedInUserId
             ORDER BY Check_in_Time__c DESC
         ];
 

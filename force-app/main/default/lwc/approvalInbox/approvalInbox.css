@@ -1,0 +1,41 @@
+/* Card spacing */
+:host {
+    display: block;
+}
+
+/* Table header styling */
+.slds-table thead th {
+    background-color: #f3f3f3;
+    font-weight: 600;
+}
+
+/* Row hover effect */
+.slds-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+/* Align action buttons */
+.slds-text-align_center lightning-button-group {
+    justify-content: center;
+}
+
+/* Improve badge look */
+.slds-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.75rem;
+}
+
+/* Empty state center */
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 120px;
+}
+
+/* Button spacing fix */
+lightning-button + lightning-button {
+    margin-left: 0.25rem;
+}

@@ -3,28 +3,30 @@ import { CurrentPageReference } from 'lightning/navigation';
 import getOrderDetails from '@salesforce/apex/OrderManagementController.getOrderDetails';
 import submitOrderForApproval from '@salesforce/apex/OrderManagementController.submitOrderForApproval';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
- 
+import CustomAlert from 'c/customAlert';
+
+
 export default class OrderView extends LightningElement {
     orderId;
- 
+
     // ---------- ORDER DATA ----------
     @track orderNumber;
     @track orderDate;
     @track totalAmount;
     @track orderStatus;
     @track statusClass;
- 
+
     @track customerName;
     @track email;
     @track phone;
- 
+
     @track products = []; // order items
     @track shipping = 0;
     @track tax = 0;
- 
+
     @track timeline = []; // <-- new timeline array
     dataLoaded = false; // <-- track if data is ready
- 
+
     // ---------- GET ORDER ID FROM URL ----------
     @wire(CurrentPageReference)
     setPageReference(pageRef) {
@@ -33,10 +35,15 @@ export default class OrderView extends LightningElement {
             this.fetchOrderDetails(); // <-- call method when orderId is set
         }
     }
- 
+
+    showToast(title, message, variant) {
+        this.dispatchEvent(
+            new ShowToastEvent({ title, message, variant })
+        );
+    }
     fetchOrderDetails() {
         if (!this.orderId) return;
- 
+
         getOrderDetails({ orderId: this.orderId })
             .then((data) => {
                 console.log("datadatadata", data)
@@ -46,11 +53,11 @@ export default class OrderView extends LightningElement {
                     this.totalAmount = data.order.TotalAmount;
                     this.orderStatus = data.order.Status;
                     this.statusClass = this.getStatusClass(data.order.Status);
- 
+
                     this.customerName = data.order.Account?.Name;
                     this.email = data.order?.Account?.PersonEmail;
                     this.phone = data?.order?.Account?.Phone;
- 
+
                     this.products = data?.order?.OrderItems?.map(item => ({
                         id: item.Id,
                         name: item.Product2.Name,
@@ -59,13 +66,12 @@ export default class OrderView extends LightningElement {
                         price: item.UnitPrice,
                         total: item.TotalPrice
                     })) || [];
- 
+
                     this.shipping = data?.order?.Shipping || 0;
                     this.tax = data.Tax || 0;
- 
+
                     // ---------- DYNAMIC TIMELINE ----------
-                    this.timeline = this.getTimeline(data.order.Status);
- 
+                    this.timeline = this.getTimeline();
                     this.dataLoaded = true; // <-- now template can render
                 }
             })
@@ -73,13 +79,17 @@ export default class OrderView extends LightningElement {
                 console.error('Error fetching order details', error);
             });
     }
- 
+
     get grandTotal() {
         return (this.totalAmount || 0) + (this.tax || 0);
     }
- 
+
+    get statusClass() {
+        return `status ${this.orderStatus?.toLowerCase()}`;
+    }
+
     getStatusClass(status) {
-        switch(status) {
+        switch (status) {
             case 'Delivered': return 'delivered';
             case 'Approved': return 'processing';
             case 'Returned': return 'shipped';
@@ -88,101 +98,138 @@ export default class OrderView extends LightningElement {
             default: return 'pending';
         }
     }
- 
-@track isApprovalModalOpen = false;
-@track approvalComment = '';
- 
-// Open modal
-openApprovalModal() {
-    this.isApprovalModalOpen = true;
-}
- 
-get canSubmitApproval() {
-    // show button only if status is not 'Approved', 'Delivered', or 'Cancelled'
-    return !['Approved', 'Delivered', 'Cancelled', 'Rejected'].includes(this.orderStatus);
-}
- 
-// Close modal
-closeApprovalModal() {
-    this.isApprovalModalOpen = false;
-    this.approvalComment = ''; // reset comment
-}
- 
-// Handle comment input
-handleCommentChange(event) {
-    this.approvalComment = event.target.value;
-}
- 
-// Submit approval
-handleSubmitApproval() {
-    if (!this.approvalComment) {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Error',
-                message: 'Please enter a comment before submitting.',
-                variant: 'error'
-            })
-        );
-        return;
+
+    @track isApprovalModalOpen = false;
+    @track approvalComment = '';
+
+    // Open modal
+    openApprovalModal() {
+        this.isApprovalModalOpen = true;
     }
- 
-    submitOrderForApproval({
-        orderId: this.orderId,
-        comment: this.approvalComment
-    })
-    .then(result => {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Success',
-                message: result,
-                variant: 'success'
+
+    get canSubmitApproval() {
+        // show button only if status is not 'Approved', 'Delivered', or 'Cancelled'
+        return !['Approved', 'Delivered', 'Cancelled', 'Rejected', 'Submitted for Approval', 'In Progress', 'On Hold', 'Returned', 'Failed'].includes(this.orderStatus);
+    }
+
+    // Close modal
+    closeApprovalModal() {
+        this.isApprovalModalOpen = false;
+        this.approvalComment = ''; // reset comment
+    }
+
+    // Handle comment input
+    handleCommentChange(event) {
+        this.approvalComment = event.target.value;
+    }
+
+
+
+
+    // Submit approval
+    handleSubmitApproval() {
+        if (!this.approvalComment) {
+            this.isApprovalModalOpen = false;
+
+            // 2️⃣ Open LightningModal AFTER
+            setTimeout(() => {
+                CustomAlert.open({
+                    size: 'small',
+                    title: 'Error',
+                    message: 'Please enter a comment before submitting.'
+                });
+            }, 0);
+
+            return;
+        }
+        submitOrderForApproval({
+            orderId: this.orderId,
+            comment: this.approvalComment
+        })
+            .then(result => {
+                this.isApprovalModalOpen = false;
+
+                setTimeout(() => {
+                    CustomAlert.open({
+                        size: 'small',
+                        title: 'Success',
+                        message: result
+                    });
+                }, 0);
+
+
+                this.closeApprovalModal(); // close modal after success
+                this.fetchOrderDetails();  // refresh order
             })
-        );
-        this.closeApprovalModal(); // close modal after success
-        this.fetchOrderDetails(); // refresh order
-    })
-    .catch(error => {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Error',
-                message: error.body?.message || error.message,
-                variant: 'error'
-            })
-        );
-    });
-}
- 
+            .catch(error => {
+                this.isApprovalModalOpen = false;
+                setTimeout(() => {
+                    CustomAlert.open({
+                        size: 'small',
+                        title: 'Error',
+                        message: error.body?.message || error.message,
+                    });
+                }, 0);
+
+
+            });
+    }
+
     // ---------- TIMELINE LOGIC ----------
- getTimeline(currentStatus) {
-    const steps = [
-        { label: 'Draft', description: 'Order is in draft stage' },
-        { label: 'Order Placed', description: 'Order has been placed by customer' },
-        { label: 'Processing', description: 'Order is being prepared' },
-        { label: 'Shipped', description: 'Order is on its way' },
-        { label: 'Delivered', description: 'Order has been delivered' }
-    ];
- 
-    const statusOrder = ['Draft', 'Order Placed', 'Processing', 'Shipped', 'Delivered'];
- 
-    const currentIndex = statusOrder.indexOf(this.mapStatusToStep(currentStatus));
- 
-    return steps.map((step, index) => {
-        let color = 'gray';
-        if (index < currentIndex) color = 'green';        // completed
-        else if (index === currentIndex) color = 'orange'; // current step
-        return { ...step, color };
-    });
-}
- 
-mapStatusToStep(status) {
-    switch(status) {
-        case 'Draft': return 'Draft';
-        case 'Delivered': return 'Delivered';
-        case 'Approved': return 'Processing';
-        case 'Returned': return 'Shipped';
-        default: return 'Order Placed';
+    getTimeline() {
+
+        const steps = [
+            {
+                label: 'Draft',
+                description: 'Order is in draft stage',
+                color: 'blue'
+            },
+            {
+                label: 'Order Placed',
+                description: 'Order has been placed by customer',
+                color: 'blue'
+            },
+            {
+                label: 'Processing',
+                description: 'Order is being prepared',
+                color: 'orange'
+            },
+            {
+                label: 'Shipped',
+                description: 'Order is on its way',
+                color: 'gray'
+            },
+            {
+                label: 'Delivered',
+                description: 'Order has been delivered',
+                color: 'green'
+            }
+        ];
+
+        return steps;
+    }
+
+    mapStatusToStep(status) {
+
+        switch (status) {
+
+            case 'Draft':
+                return 'Draft';
+
+            case 'Delivered':
+                return 'Delivered';
+
+            case 'Approved':
+                return 'Processing';
+
+            case 'Returned':
+                return 'Shipped';
+
+            case 'Cancelled':
+                return 'Order Placed';
+
+            default:
+                return 'Order Placed';
+        }
     }
 }
-}
- 
- 
