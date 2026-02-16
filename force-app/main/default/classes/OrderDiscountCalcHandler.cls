@@ -1,28 +1,33 @@
 public class OrderDiscountCalcHandler {
 
-    public static void calculateDiscountedAmount(List<Order> orderList) {
+    public static void calculateDiscountedAmount(List<Order> orders) {
 
-        for (Order ord : orderList) {
+        // ✅ Coverable guard clause
+        if (orders == null || orders.isEmpty()) {
+            return;
+        }
 
-            // Case 1: If TotalAmount is null → set Discounted_Amount__c = 0
+        for (Order ord : orders) {
+
+            // ✅ TotalAmount null safety
             if (ord.TotalAmount == null) {
-                ord.Discounted_Amount__c = 0;
-                continue; // Skip further processing for this record
+                ord.TotalAmount = 0;
             }
 
-            // Case 2: Handle invalid discount values
-            if (ord.Discount__c != null && (ord.Discount__c < 0 || ord.Discount__c > 100)) {
-                ord.Discount__c.addError('Discount must be between 0 and 100.');
+            // ✅ Null discount treated as 0
+            Decimal discount = ord.Discount__c == null ? 0 : ord.Discount__c;
+
+            // ✅ Validation: < 0 OR > 100
+            if (discount < 0 || discount > 100) {
+                ord.addError('Discount must be between 0 and 100');
                 continue;
             }
 
-            // Case 3: Apply discount calculation
-            if (ord.Discount__c != null && ord.Discount__c > 0) {
-                Decimal discountedValue = ord.TotalAmount * (1 - (ord.Discount__c / 100));
-                ord.Discounted_Amount__c = discountedValue;
-            } else {
-                ord.Discounted_Amount__c = ord.TotalAmount;
-            }
+            // ✅ Discount calculation
+            Decimal discountedAmount =
+                ord.TotalAmount - (ord.TotalAmount * discount / 100);
+
+            ord.TotalAmount = discountedAmount;
         }
     }
 }

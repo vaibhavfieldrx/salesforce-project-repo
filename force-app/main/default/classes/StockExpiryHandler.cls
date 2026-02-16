@@ -1,20 +1,33 @@
 public class StockExpiryHandler {
 
     // ✅ Make sure method name and signature match exactly with trigger call
-    public static void handleStockLedger(List<Stock_Ledger__c> stockList) {
+ public static void handleStockLedger(
+        List<Stock_Ledger__c> newList,
+        Map<Id, Stock_Ledger__c> oldMap
+    ) {
         List<Return_Order__c> returnOrders = new List<Return_Order__c>();
         Date today = Date.today();
 
-        for (Stock_Ledger__c stock : stockList) {
-            if (stock.Expiry_Date__c == today) {
-                Return_Order__c ro = new Return_Order__c();
-                ro.Order_Stock_Ledger__c = stock.Id;
-                ro.Stock__c = stock.Stock__c;
-                ro.Product__c = stock.Product__c;
-                ro.Return_Date__c = System.now();
-                ro.Return_Status__c = 'Pending';
-                ro.Reason__c = 'Expired';
-                returnOrders.add(ro);
+        for (Stock_Ledger__c stock : newList) {
+
+            Stock_Ledger__c oldStock = oldMap != null ? oldMap.get(stock.Id) : null;
+
+            Boolean newlyExpired =
+                stock.Expiry_Date__c != null &&
+                stock.Expiry_Date__c <= today &&
+                (oldStock == null || oldStock.Expiry_Date__c > today);
+
+            if (newlyExpired && stock.Remaining_Quantity__c > 0) {
+
+                returnOrders.add(new Return_Order__c(
+                    Order_Stock_Ledger__c = stock.Id,
+                    Stock__c = stock.Stock__c,
+                    Product__c = stock.Product__c,
+                    Quantity__c = stock.Remaining_Quantity__c,
+                    Return_Date__c = System.now(),
+                    Return_Status__c = 'Pending',
+                    Reason__c = 'Expired'
+                ));
             }
         }
 
@@ -23,7 +36,8 @@ public class StockExpiryHandler {
         }
     }
 
-    // ✅ Daily mail to admin
+
+     // ✅ Daily mail to admin
     public static void sendExpiryEmail() {
         List<Stock__c> expiredStocks = [
             SELECT Name, Expiry_Date__c
@@ -44,4 +58,5 @@ public class StockExpiryHandler {
             Messaging.sendEmail(new Messaging.SingleEmailMessage[] { email });
         }
     }
+   
 }
