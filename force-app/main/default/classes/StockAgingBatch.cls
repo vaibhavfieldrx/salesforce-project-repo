@@ -1,6 +1,6 @@
 global class StockAgingBatch implements Database.Batchable<SObject>, Database.Stateful {
+
     global Database.QueryLocator start(Database.BatchableContext bc) {
-        // Query all Stock Ledger records that need aging calculation
         return Database.getQueryLocator([
             SELECT Id, CreatedDate, 
                    Product_In__c, Product_Out__c,
@@ -14,14 +14,17 @@ global class StockAgingBatch implements Database.Batchable<SObject>, Database.St
             WHERE CreatedDate != NULL
         ]);
     }
+
     global void execute(Database.BatchableContext bc, List<Stock_Ledger__c> scope) {
+
         Date today = Date.today();
- 
+
         for (Stock_Ledger__c s : scope) {
-            // Calculate months difference
-            Integer months = today.monthsBetween(s.CreatedDate.date());
- 
-            // Reset all checkboxes
+
+            // ✅ CORRECT month calculation
+            Integer months = s.CreatedDate.date().monthsBetween(today);
+
+            // Reset all flags
             s.X0_3_IN__c = false;
             s.X0_3_OUT__c = false;
             s.X3_6_IN__c = false;
@@ -34,11 +37,10 @@ global class StockAgingBatch implements Database.Batchable<SObject>, Database.St
             s.More_Than_12_Months_OUT__c = false;
             s.More_Than_24_Months_IN__c = false;
             s.More_Than_24_Months_OUT__c = false;
- 
-            // Determine IN/OUT
-            Boolean isIn = s.Product_In__c != null && s.Product_In__c > 0;
+
+            Boolean isIn  = s.Product_In__c  != null && s.Product_In__c  > 0;
             Boolean isOut = s.Product_Out__c != null && s.Product_Out__c > 0;
- 
+
             if (isIn) {
                 if (months <= 3) s.X0_3_IN__c = true;
                 else if (months <= 6) s.X3_6_IN__c = true;
@@ -47,7 +49,7 @@ global class StockAgingBatch implements Database.Batchable<SObject>, Database.St
                 else if (months <= 24) s.More_Than_12_Months_IN__c = true;
                 else s.More_Than_24_Months_IN__c = true;
             }
- 
+
             if (isOut) {
                 if (months <= 3) s.X0_3_OUT__c = true;
                 else if (months <= 6) s.X3_6_OUT__c = true;
@@ -57,10 +59,10 @@ global class StockAgingBatch implements Database.Batchable<SObject>, Database.St
                 else s.More_Than_24_Months_OUT__c = true;
             }
         }
- 
+
         update scope;
     }
- 
+
     global void finish(Database.BatchableContext bc) {
         System.debug('Stock Aging Batch completed successfully.');
     }
